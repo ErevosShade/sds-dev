@@ -197,7 +197,7 @@ export default function Gallery() {
         <div style={{ width: 80, flexShrink: 0 }} />
 
         {/* "See all photos" link at end of track */}
-        <a href="/gallery" style={{
+        <a href="/gallery" className="btn-press" style={{
           flexShrink: 0, textDecoration: "none",
           height: "clamp(240px, 40vh, 380px)",
           width: "clamp(180px, 18vw, 260px)",

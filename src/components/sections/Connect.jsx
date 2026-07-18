@@ -147,6 +147,7 @@ export default function Connect() {
 
               <button
                 type="submit"
+                className="btn-press"
                 style={{
                   fontFamily: "var(--font-body)", fontSize: "var(--text-sm)",
                   letterSpacing: "0.04em",

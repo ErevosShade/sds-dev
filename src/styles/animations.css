@@ -63,3 +63,22 @@
 .marquee-track:hover {
   animation-play-state: paused;
 }
+
+/* ── Button press feedback — a satisfying, subtle push-down on click/tap.
+   Applied to primary CTAs only; not every hover link needs it. ── */
+.btn-press {
+  transition: transform 0.15s var(--ease-out), box-shadow 0.15s var(--ease-out);
+}
+
+.btn-press:active {
+  transform: translateY(1px) scale(0.97);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn-press {
+    transition: none;
+  }
+  .btn-press:active {
+    transform: none;
+  }
+}

@@ -207,11 +207,11 @@ export default function Hero() {
           Real projects. Real problems. Real placements.
         </p>
         <div className="hero-cta" style={{ display: "flex", gap: 12, marginTop: 40 }}>
-          <a href="/#connect" style={{ fontFamily: "var(--font-body)", fontSize: "var(--text-sm)", letterSpacing: "0.04em", color: "var(--paper-white)", textDecoration: "none", padding: "12px 28px", background: "var(--data-blue)", borderRadius: "var(--radius-sm)", border: "1px solid var(--data-blue)", transition: "opacity 0.2s var(--ease-out)" }}
+          <a href="/#connect" className="btn-press" style={{ fontFamily: "var(--font-body)", fontSize: "var(--text-sm)", letterSpacing: "0.04em", color: "var(--paper-white)", textDecoration: "none", padding: "12px 28px", background: "var(--data-blue)", borderRadius: "var(--radius-sm)", border: "1px solid var(--data-blue)", transition: "opacity 0.2s var(--ease-out)" }}
             onMouseEnter={e => e.currentTarget.style.opacity = "0.85"} onMouseLeave={e => e.currentTarget.style.opacity = "1"}>
             Join SDS
           </a>
-          <a href="/#projects" style={{ fontFamily: "var(--font-body)", fontSize: "var(--text-sm)", letterSpacing: "0.04em", color: "rgba(238,233,220,0.6)", textDecoration: "none", padding: "12px 28px", background: "transparent", borderRadius: "var(--radius-sm)", border: "1px solid rgba(255,255,255,0.12)", transition: "border-color 0.2s var(--ease-out), color 0.2s var(--ease-out)" }}
+          <a href="/#projects" className="btn-press" style={{ fontFamily: "var(--font-body)", fontSize: "var(--text-sm)", letterSpacing: "0.04em", color: "rgba(238,233,220,0.6)", textDecoration: "none", padding: "12px 28px", background: "transparent", borderRadius: "var(--radius-sm)", border: "1px solid rgba(255,255,255,0.12)", transition: "border-color 0.2s var(--ease-out), color 0.2s var(--ease-out)" }}
             onMouseEnter={e => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.3)"; e.currentTarget.style.color = "var(--paper-white)"; }}
             onMouseLeave={e => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.12)"; e.currentTarget.style.color = "rgba(238,233,220,0.6)"; }}>
             See our work ↗

@@ -65,6 +65,7 @@ export default function Testimonials() {
           <button
             onClick={() => setPaused(p => !p)}
             aria-label={paused ? "Resume auto-advancing testimonials" : "Pause auto-advancing testimonials"}
+            className="btn-press"
             style={{
               background: "none", border: "1px solid rgba(255,255,255,0.1)",
               borderRadius: "var(--radius-sm)", padding: "6px 12px",

@@ -109,6 +109,7 @@ export default function Navbar() {
       {/* CTA */}
       <a
         href="/#connect"
+        className="btn-press"
         style={{
           fontFamily: "var(--font-body)",
           fontSize: "var(--text-sm)",
