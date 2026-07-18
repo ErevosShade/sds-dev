@@ -66,7 +66,6 @@ export default function Gallery() {
         background: "var(--void)",
         height: "100vh",
         overflow: "hidden",
-        borderTop: "1px solid rgba(255,255,255,0.04)",
         position: "relative",
       }}
     >

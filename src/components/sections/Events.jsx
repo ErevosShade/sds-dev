@@ -5,29 +5,71 @@ import { EVENTS } from "../../data/events";
 
 gsap.registerPlugin(ScrollTrigger);
 
+const BLUE = "#3B6FE8"; // this section uses blue only — no orange/amber anywhere
+const PAPER_WHITE_RGB = [238, 233, 220];
+const BLUE_RGB = [59, 111, 232];
+
+// Lerp from BLUE (far/blurred) to paper-white (centered/sharp) as t goes 1 → 0.
+function nameColor(t) {
+  const c = PAPER_WHITE_RGB.map((v, i) => Math.round(v + (BLUE_RGB[i] - v) * t));
+  return `rgb(${c[0]}, ${c[1]}, ${c[2]})`;
+}
+
 export default function Events() {
   const sectionRef  = useRef(null);
-  const compassRef  = useRef(null);
-  const needleRef   = useRef(null);
+  const compassWrapRef = useRef(null);
+  const dialRef     = useRef(null);
+  const nameRefs    = useRef([]);
   const [active, setActive]   = useState(0);
   const activeRef = useRef(0);
 
+  const ROW_HEIGHT = 76;
+
+  // Scroll pins the section, drives which event is active, turns the big
+  // background compass, and glides the vertical name wheel — one continuous
+  // scrub. Free-flowing: everything moves smoothly with scroll position,
+  // never snapping to fixed stops. A small scroll distance per event keeps
+  // switching quick.
   useEffect(() => {
     const section = sectionRef.current;
-    const compass = compassRef.current;
-    const needle  = needleRef.current;
-    if (!section || !compass || !needle) return;
+    const dial = dialRef.current;
+    if (!section || !dial) return;
 
     const total = EVENTS.length;
+    const SWEEP_DEG = -360; // reversed — one full, clearly-visible glide the other way
+
+    // Positions the name wheel for a given scroll progress: the current name
+    // sits sharp, white, and centered; neighbors drift off, blur, and pick up
+    // a blue tint as they recede — like text riding the rim of the same dial
+    // that's rotating. Only translateX curves them (no rotate) so every name
+    // stays perfectly horizontal/readable even as it arcs away from center.
+    const updateNames = (progress) => {
+      const continuous = progress * total;
+      nameRefs.current.forEach((el, i) => {
+        if (!el) return;
+        const delta = i - continuous;
+        const dist = Math.abs(delta);
+        const ty = delta * ROW_HEIGHT;
+        const tx = -Math.min(dist * dist * 6, 70); // curves away/left as it recedes, like a rim
+        const opacity = Math.max(0, 1 - dist * 0.7);
+        const blur = Math.min(dist * 3.5, 8);
+        el.style.transform = `translateY(calc(-50% + ${ty}px)) translateX(${tx}px)`;
+        el.style.opacity = opacity;
+        el.style.filter = `blur(${blur}px)`;
+        el.style.color = nameColor(Math.min(dist, 1));
+      });
+    };
 
     const ctx = gsap.context(() => {
+      updateNames(0);
+
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: section,
           pin: true,
-          scrub: 1.2,
+          scrub: 1, // smoothing lag — reads as a glide, not a mechanical snap
           start: "top top",
-          end: `+=${total * 700}`,
+          end: `+=${total * 320}`,
           onUpdate: (self) => {
             const idx = Math.min(
               Math.floor(self.progress * total),
@@ -37,15 +79,23 @@ export default function Events() {
               activeRef.current = idx;
               setActive(idx);
             }
+
+            updateNames(self.progress);
           },
         },
       });
 
-      // Rotate compass 360° over the full scroll
-      tl.to(compass, {
-        rotation: 360,
+      // Tween a plain object, not the CSS transform directly — then apply the
+      // rotation as a native SVG transform="rotate(deg 150 150)" attribute.
+      // CSS transform-origin/transform-box on SVG elements is ambiguous across
+      // browsers (that was the real cause of the tick ring drifting off the
+      // bezel's center); the SVG rotate() syntax's pivot is unambiguous.
+      const rotationState = { deg: 0 };
+      tl.to(rotationState, {
+        deg: SWEEP_DEG,
         ease: "none",
         duration: total,
+        onUpdate: () => dial.setAttribute("transform", `rotate(${rotationState.deg} 150 150)`),
       });
     }, section);
 
@@ -59,169 +109,176 @@ export default function Events() {
       ref={sectionRef}
       id="events"
       style={{
+        position: "relative",
         background: "var(--void)",
         minHeight: "100vh",
         display: "flex",
         alignItems: "center",
         padding: "0 clamp(24px, 6vw, 96px)",
-        borderTop: "1px solid rgba(255,255,255,0.04)",
-        overflow: "hidden",
       }}
     >
-      <div style={{ width: "100%", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "clamp(40px, 6vw, 100px)", alignItems: "center" }}>
+      {/* Ambient room glow — always blue, never orange/amber. Pulled in tighter
+          (smaller ellipse, faster falloff) so it stays close to the dial
+          instead of flooding outward — but still NOT clipped top/bottom (no
+          overflow:hidden on the section), so it keeps bleeding into the
+          sections above and below, same as before. The page body already
+          clips horizontal overflow globally, so this is safe. */}
+      <div style={{
+        position: "absolute",
+        left: 0, right: 0,
+        top: "-30vh", bottom: "-30vh",
+        zIndex: 0, pointerEvents: "none",
+        background: `radial-gradient(ellipse 46% 60% at 56px 50%, ${BLUE}38 0%, ${BLUE}14 25%, transparent 50%)`,
+      }} />
 
-        {/* LEFT — Compass */}
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-          <p style={{
-            fontFamily: "var(--font-mono)", fontSize: "var(--text-xs)",
-            letterSpacing: "0.18em", textTransform: "uppercase",
-            color: "var(--amber)", marginBottom: 48, alignSelf: "flex-start",
-          }}>Events</p>
+      {/* Giant compass — a complete circle, anchored so its center sits exactly on the
+          left screen edge. Only the right half is ever visible (cropped naturally by
+          the section's overflow, no drawn seam/line pretending it's a half-shape).
+          Opacity nudged down slightly so it reads as more recessed/background. */}
+      <div ref={compassWrapRef} className="sds-compass-decor" style={{
+        position: "absolute",
+        left: "56px",
+        top: "50%",
+        transform: "translate(-50%, -50%)",
+        width: "clamp(600px, 60vw, 900px)",
+        aspectRatio: "1",
+        opacity: 0.82,
+        zIndex: 0,
+        pointerEvents: "none",
+      }}>
+        <svg
+          viewBox="-20 -20 340 340"
+          style={{ width: "100%", height: "100%" }}
+        >
+          {/* Outer bezel — minimal: one crisp ring, one faint inner ring */}
+          <circle cx="150" cy="150" r="142" fill="none" stroke={`${BLUE}60`} strokeWidth="1.5" />
+          <circle cx="150" cy="150" r="120" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="0.5" />
 
-          {/* Compass ring */}
-          <div style={{ position: "relative", width: "clamp(260px, 30vw, 380px)", aspectRatio: "1" }}>
-            {/* Outer ring */}
-            <svg
-              ref={compassRef}
-              viewBox="0 0 300 300"
-              style={{ width: "100%", height: "100%", position: "absolute", inset: 0 }}
-            >
-              {/* Outer circle */}
-              <circle cx="150" cy="150" r="140" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="1" />
-              <circle cx="150" cy="150" r="120" fill="none" stroke="rgba(255,255,255,0.04)" strokeWidth="0.5" />
+          {/* Dial — ticks, event markers. Rotated via a native SVG transform attribute
+              (rotate(deg 150 150)) set imperatively — see the effect above. */}
+          <g ref={dialRef}>
 
-              {/* Tick marks — every 15 degrees */}
-              {Array.from({ length: 24 }, (_, i) => {
-                const angle = (i * 15 * Math.PI) / 180;
-                const isMajor = i % 6 === 0;
-                const r1 = 132, r2 = isMajor ? 118 : 124;
-                return (
-                  <line key={i}
-                    x1={150 + r1 * Math.sin(angle)} y1={150 - r1 * Math.cos(angle)}
-                    x2={150 + r2 * Math.sin(angle)} y2={150 - r2 * Math.cos(angle)}
-                    stroke={isMajor ? "rgba(255,255,255,0.2)" : "rgba(255,255,255,0.08)"}
+            {/* Minimal graduated ticks — every 15 degrees, two tiers only.
+                Each tick is its own <g rotate(deg 150 150)> wrapping a vertical
+                line drawn straight up from center — the exact clock-hand
+                technique (rotate around the shared pivot, not hand-computed
+                sin/cos coordinates), so every tick is provably concentric
+                with the bezel regardless of browser transform quirks. */}
+            {Array.from({ length: 24 }, (_, i) => {
+              const deg = i * 15;
+              const isMajor = deg % 90 === 0;
+              const r1 = 132;
+              const r2 = isMajor ? 112 : 122;
+              return (
+                <g key={i} transform={`rotate(${deg} 150 150)`}>
+                  <line
+                    x1="150" y1={150 - r1}
+                    x2="150" y2={150 - r2}
+                    stroke={isMajor ? `${BLUE}55` : "rgba(255,255,255,0.14)"}
                     strokeWidth={isMajor ? 1.5 : 0.75}
                   />
-                );
-              })}
+                </g>
+              );
+            })}
 
-              {/* Event dots on the ring */}
-              {EVENTS.map((ev, i) => {
-                const angle = ((i / EVENTS.length) * 360 * Math.PI) / 180;
-                const r = 140;
-                const isActive = i === active;
-                return (
-                  <circle key={i}
-                    cx={150 + r * Math.sin(angle)}
-                    cy={150 - r * Math.cos(angle)}
+            {/* Event dots — evenly spaced around the full ring, same rotate-around-pivot technique */}
+            {EVENTS.map((ev, i) => {
+              const deg = (i / EVENTS.length) * 360;
+              const isActive = i === active;
+              return (
+                <g key={i} transform={`rotate(${deg} 150 150)`}>
+                  <circle
+                    cx="150" cy={150 - 140}
                     r={isActive ? 5 : 3}
-                    fill={isActive ? ev.accentColor : "rgba(255,255,255,0.15)"}
-                    style={{ transition: "all 0.4s ease", filter: isActive ? `drop-shadow(0 0 6px ${ev.accentColor})` : "none" }}
+                    fill={isActive ? BLUE : "rgba(255,255,255,0.15)"}
+                    style={{ transition: "all 0.4s ease", filter: isActive ? `drop-shadow(0 0 6px ${BLUE})` : "none" }}
                   />
-                );
-              })}
+                </g>
+              );
+            })}
+          </g>
+        </svg>
+      </div>
 
-              {/* Needle */}
-              <line ref={needleRef}
-                x1="150" y1="150"
-                x2="150" y2="22"
-                stroke={event?.accentColor || "var(--amber)"}
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                style={{ transformOrigin: "150px 150px", transform: `rotate(${(active / EVENTS.length) * 360}deg)`, transition: "all 0.6s cubic-bezier(0.34,1.56,0.64,1)" }}
-              />
+      <div style={{ position: "relative", zIndex: 2, width: "100%", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "clamp(40px, 6vw, 100px)", alignItems: "stretch" }}>
 
-              {/* Center dot */}
-              <circle cx="150" cy="150" r="4" fill="rgba(255,255,255,0.15)" />
-              <circle cx="150" cy="150" r="2" fill="var(--paper-white)" />
+        {/* LEFT — dial + name, vertically centered so their middle line matches the
+            card's middle line and the compass's own center (all three share one axis) */}
+        <div style={{ position: "relative", minHeight: 260 }}>
+          <p style={{
+            position: "absolute", top: 0, left: 0,
+            fontFamily: "var(--font-mono)", fontSize: "var(--text-xs)",
+            letterSpacing: "0.18em", textTransform: "uppercase",
+            color: BLUE, margin: 0,
+          }}>Events</p>
 
-              {/* Cardinal labels */}
-              {[["N","150","20"],["E","285","155"],["S","150","290"],["W","18","155"]].map(([l,x,y]) => (
-                <text key={l} x={x} y={y} textAnchor="middle" dominantBaseline="middle"
-                  fill="rgba(255,255,255,0.12)" fontSize="11"
-                  style={{ fontFamily: "var(--font-mono)", letterSpacing: "0.1em" }}>{l}</text>
-              ))}
-            </svg>
-
-            {/* Center coordinate display */}
-            <div style={{
-              position: "absolute", inset: 0, display: "flex",
-              alignItems: "center", justifyContent: "center",
-              flexDirection: "column", gap: 4,
-            }}>
-              <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-xs)", color: "var(--text-muted)", letterSpacing: "0.1em" }}>
-                {event?.coordinate || "—"}
-              </span>
-            </div>
-          </div>
-
-          {/* Event title list */}
-          <div style={{ marginTop: 40, width: "100%", display: "flex", flexDirection: "column", gap: 8 }}>
+          {/* Event name wheel — sits in the gap between the dial and the card, nudged right.
+              Glides continuously with scroll; the current name is sharp, neighbors drift
+              off-center and blur out, like a picker on a physical dial. */}
+          <div style={{ position: "absolute", top: "50%", left: 0, right: 0, transform: "translateY(-50%) translateX(104px)", height: 260, overflow: "hidden" }}>
             {EVENTS.map((ev, i) => (
-              <div key={i} style={{
-                display: "flex", alignItems: "center", gap: 14,
-                padding: "10px 0",
-                borderBottom: "1px solid rgba(255,255,255,0.04)",
-                cursor: "default",
-                transition: "opacity 0.3s ease",
-                opacity: i === active ? 1 : 0.25,
-              }}>
-                <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--text-dim)", minWidth: 28 }}>0{i+1}</span>
-                <span style={{
+              <h3
+                key={i}
+                ref={(el) => (nameRefs.current[i] = el)}
+                style={{
+                  position: "absolute", top: "50%", right: 0,
+                  width: "min(52%, 280px)",
+                  textAlign: "right",
                   fontFamily: "var(--font-display)",
-                  fontSize: "var(--text-lg)",
-                  color: i === active ? "var(--paper-white)" : "rgba(238,233,220,0.5)",
-                  transition: "color 0.3s ease",
-                }}>{ev.title}</span>
-                {i === active && (
-                  <span style={{
-                    marginLeft: "auto",
-                    fontFamily: "var(--font-mono)", fontSize: 10,
-                    color: ev.accentColor,
-                    letterSpacing: "0.06em", textTransform: "uppercase",
-                  }}>{ev.tag}</span>
-                )}
-              </div>
+                  fontSize: "clamp(22px, 2.4vw, 32px)",
+                  fontWeight: 400,
+                  color: "var(--paper-white)",
+                  lineHeight: 1.2,
+                  margin: 0,
+                  overflowWrap: "break-word",
+                  willChange: "transform, filter, opacity",
+                }}
+              >{ev.title}</h3>
             ))}
           </div>
         </div>
 
-        {/* RIGHT — Event detail card */}
-        <div key={active} style={{ animation: "fadeUp 0.5s ease forwards" }}>
+        {/* RIGHT — Event detail card. The shell mounts once (no key={active} here) —
+            only its content swaps as the active event changes, so it never
+            "reloads"; border/accent colors just transition smoothly in place. */}
+        <div style={{ alignSelf: "center", justifySelf: "end", width: "100%", maxWidth: 400 }}>
           <div style={{
             background: "var(--surface)",
-            border: `1px solid ${event?.accentColor}28`,
+            border: `1px solid ${BLUE}28`,
             borderRadius: "var(--radius-lg)",
             padding: "clamp(28px, 3vw, 48px)",
+            minHeight: 480,
+            display: "flex",
+            flexDirection: "column",
             position: "relative",
             overflow: "hidden",
           }}>
             {/* Top accent line */}
             <div style={{
               position: "absolute", top: 0, left: 0, right: 0, height: 1,
-              background: `linear-gradient(90deg, transparent, ${event?.accentColor}80, transparent)`,
+              background: `linear-gradient(90deg, transparent, ${BLUE}80, transparent)`,
             }} />
 
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 24 }}>
               <span style={{
                 fontFamily: "var(--font-mono)", fontSize: "var(--text-xs)",
                 letterSpacing: "0.1em", textTransform: "uppercase",
-                color: event?.accentColor,
-                background: `${event?.accentColor}15`,
-                border: `1px solid ${event?.accentColor}28`,
+                color: BLUE,
+                background: `${BLUE}15`,
+                border: `1px solid ${BLUE}28`,
                 padding: "4px 10px", borderRadius: "var(--radius-sm)",
               }}>{event?.tag}</span>
 
               <span style={{
                 display: "flex", alignItems: "center", gap: 6,
                 fontFamily: "var(--font-mono)", fontSize: "var(--text-xs)",
-                color: event?.status === "upcoming" ? "#E8894A" : "var(--text-muted)",
-                background: event?.status === "upcoming" ? "rgba(232,137,74,0.1)" : "rgba(255,255,255,0.05)",
-                border: event?.status === "upcoming" ? "1px solid rgba(232,137,74,0.25)" : "1px solid rgba(255,255,255,0.08)",
+                color: event?.status === "upcoming" ? BLUE : "var(--text-muted)",
+                background: event?.status === "upcoming" ? `${BLUE}1a` : "rgba(255,255,255,0.05)",
+                border: event?.status === "upcoming" ? `1px solid ${BLUE}40` : "1px solid rgba(255,255,255,0.08)",
                 padding: "4px 12px", borderRadius: "999px",
               }}>
                 {event?.status === "upcoming" && (
-                  <span className="animate-pulse-amber" style={{ width: 6, height: 6, borderRadius: "50%", background: "#E8894A", display: "inline-block" }} />
+                  <span className="animate-pulse-blue" style={{ width: 6, height: 6, borderRadius: "50%", background: BLUE, display: "inline-block" }} />
                 )}
                 {event?.status === "upcoming" ? "Upcoming" : "Completed"}
               </span>
@@ -244,7 +301,7 @@ export default function Events() {
               marginBottom: 32,
             }}>{event?.description}</p>
 
-            <div style={{ display: "flex", flexDirection: "column", gap: 10, borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: 24 }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 10, borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: 24, marginTop: "auto" }}>
               <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
                 <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--text-dim)", letterSpacing: "0.08em", textTransform: "uppercase", minWidth: 48 }}>Date</span>
                 <span style={{ fontFamily: "var(--font-body)", fontSize: "var(--text-sm)", color: "rgba(238,233,220,0.55)" }}>{event?.date}</span>
@@ -255,7 +312,7 @@ export default function Events() {
               </div>
               <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
                 <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--text-dim)", letterSpacing: "0.08em", textTransform: "uppercase", minWidth: 48 }}>Coord</span>
-                <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-sm)", color: event?.accentColor }}>{event?.coordinate}</span>
+                <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-sm)", color: BLUE }}>{event?.coordinate}</span>
               </div>
             </div>
           </div>
@@ -269,6 +326,12 @@ export default function Events() {
         }
         @media (max-width: 768px) {
           #events > div { grid-template-columns: 1fr !important; }
+          .sds-compass-decor {
+            position: static !important;
+            left: auto !important; top: auto !important; transform: none !important;
+            width: min(320px, 80vw) !important;
+            margin: 0 auto 32px !important;
+          }
         }
       `}</style>
     </section>

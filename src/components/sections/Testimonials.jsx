@@ -42,7 +42,6 @@ export default function Testimonials() {
       id="testimonials"
       style={{
         background: "var(--void)",
-        borderTop: "1px solid rgba(255,255,255,0.04)",
         overflow: "hidden",
       }}
     >

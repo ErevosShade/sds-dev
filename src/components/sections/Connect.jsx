@@ -23,7 +23,6 @@ export default function Connect() {
       style={{
         background: "var(--void)",
         padding: "clamp(80px, 10vw, 140px) clamp(24px, 6vw, 96px)",
-        borderTop: "1px solid rgba(255,255,255,0.04)",
       }}
     >
       <p style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-xs)", letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 16 }}>

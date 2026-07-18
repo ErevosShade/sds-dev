@@ -55,7 +55,6 @@ export default function Speakers() {
         alignItems: "center",
         justifyContent: "center",
         padding: "60px clamp(24px, 6vw, 80px)",
-        borderTop: "1px solid rgba(255,255,255,0.04)",
         overflow: "hidden",
       }}
     >
