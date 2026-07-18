@@ -1,0 +1,42 @@
+export const TESTIMONIALS = [
+  {
+    quote: "Data scientists are analytical experts who utilize their skills in both technology and social science to find trends and manage data. They use industry knowledge, contextual understanding, skepticism of existing assumptions – to uncover solutions to business challenges.",
+    name: "Prof. S. Padhi",
+    role: "Head, Department of Mathematics",
+    tag: "Faculty Advisor",
+    initials: "SP",
+    color: "#3B6FE8",
+  },
+  {
+    quote: "The expert at anything was once a beginner. We believe that the most valuable asset of a community are the people passionate about their field and willing to share their knowledge and experience with others - that are the true educators who help others grow!",
+    name: "Dr. Kirti Avishek",
+    role: "Assistant Professor, Civil and Env Engineering",
+    tag: "Faculty Advisor",
+    initials: "KA",
+    color: "#E8894A",
+  },
+  {
+    quote: "Joining SDS was the turning point of my college life. My first ML project, my first hackathon win, my first industry connection — all happened through this community.",
+    name: "Vaibhav Raj",
+    role: "President, SDS · ML & Systems",
+    tag: "SDS",
+    initials: "VR",
+    color: "#3B6FE8",
+  },
+  {
+    quote: "SDS gave me a place to fail fast and learn faster. The workshops go way beyond the syllabus — this is where you learn what the industry actually uses.",
+    name: "Himanshu Pravash",
+    role: "Vice President, SDS · Data Engineering",
+    tag: "SDS",
+    initials: "HP",
+    color: "#E8894A",
+  },
+  {
+    quote: "Being part of Hack & Forge changed how I think about problem-solving. 24 hours, real data, real pressure. Nothing prepares you for industry better than that.",
+    name: "Lakshay Mittal",
+    role: "Director, Events & Outreach",
+    tag: "SDS",
+    initials: "LM",
+    color: "#3B6FE8",
+  },
+];

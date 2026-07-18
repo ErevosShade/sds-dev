@@ -1,0 +1,85 @@
+/* ─────────────────────────────────────────────
+   SDS DESIGN TOKENS
+   Society for Data Science, BIT Mesra
+   Every value here is a deliberate decision.
+   Don't override inline — extend the token.
+───────────────────────────────────────────── */
+
+:root {
+  /* ── Backgrounds ── */
+  --void:           #0C0E14;   /* page bg — warm-leaning dark navy, not pure black */
+  --surface:        #13161F;   /* cards, navbar fill, elevated panels */
+  --surface-raised: #1C2030;   /* hover states, code blocks, active card */
+
+  /* ── Accents ── */
+  /* RULE: --data-blue and --amber NEVER appear on the same element */
+  --data-blue:      #3B6FE8;   /* primary — CTAs, active nav, links, glow */
+  --data-blue-dim:  rgba(59, 111, 232, 0.12); /* subtle tint for cards/borders */
+  --amber:          #E8894A;   /* secondary — compass needle, event dot, key stats */
+  --amber-dim:      rgba(232, 137, 74, 0.12); /* subtle amber tint */
+
+  /* ── Text ── */
+  --paper-white:    #EEE9DC;   /* headlines, body — warm off-white, not #fff */
+  --text-muted:     #6B7280;   /* timestamps, labels, secondary info */
+  --text-dim:       #374151;   /* disabled states, decorative, dividers */
+
+  /* ── Typography ── */
+  --font-display:   'DM Serif Display', Georgia, serif;   /* hero, section titles, speaker names */
+  --font-body:      'Inter', system-ui, sans-serif;        /* nav, body, cards, labels */
+  --font-mono:      'JetBrains Mono', 'Fira Code', monospace; /* stats, coordinates, footer panel */
+
+  /* ── Type Scale ── */
+  --text-xs:    0.75rem;    /* 12px — labels, badges */
+  --text-sm:    0.875rem;   /* 14px — captions, nav links */
+  --text-base:  1rem;       /* 16px — body */
+  --text-lg:    1.125rem;   /* 18px — card titles */
+  --text-xl:    1.25rem;    /* 20px */
+  --text-2xl:   1.5rem;     /* 24px */
+  --text-3xl:   1.875rem;   /* 30px */
+  --text-4xl:   2.25rem;    /* 36px */
+  --text-5xl:   3rem;       /* 48px */
+  --text-6xl:   3.75rem;    /* 60px — section headings */
+  --text-7xl:   4.5rem;     /* 72px — hero */
+  --text-8xl:   6rem;       /* 96px — hero display */
+
+  /* ── Spacing ── */
+  --space-1:  0.25rem;
+  --space-2:  0.5rem;
+  --space-3:  0.75rem;
+  --space-4:  1rem;
+  --space-6:  1.5rem;
+  --space-8:  2rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --space-20: 5rem;
+  --space-24: 6rem;
+  --space-32: 8rem;
+
+  /* ── Section rhythm — NO loose gaps ── */
+  --section-gap: 0px;         /* sections bleed into each other */
+  --section-pad: var(--space-24); /* internal top/bottom padding */
+
+  /* ── Borders / Radius ── */
+  --radius-sm:  4px;
+  --radius-md:  8px;
+  --radius-lg:  16px;
+  --border-dim: 1px solid rgba(255, 255, 255, 0.06);
+  --border-surface: 1px solid rgba(255, 255, 255, 0.10);
+
+  /* ── Transitions ── */
+  --ease-smooth: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --ease-out:    cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --dur-fast:    150ms;
+  --dur-base:    300ms;
+  --dur-slow:    600ms;
+  --dur-xslow:   1000ms;
+
+  /* ── Z-index stack ── */
+  --z-base:    0;
+  --z-above:   10;
+  --z-overlay: 100;
+  --z-nav:     200;
+  --z-modal:   300;
+  --z-cursor:  400;
+}

@@ -1,0 +1,65 @@
+/* ─────────────────────────────────────────────
+   SDS ANIMATIONS
+   Keyframes only. GSAP handles scroll-driven.
+   These are for CSS-only micro-interactions.
+───────────────────────────────────────────── */
+
+/* ── Cursor blink (footer Jupyter panel) ── */
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
+
+/* ── Status dot pulse (Active indicator) ── */
+@keyframes pulse-amber {
+  0%   { box-shadow: 0 0 0 0 rgba(232, 137, 74, 0.6); }
+  70%  { box-shadow: 0 0 0 8px rgba(232, 137, 74, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(232, 137, 74, 0); }
+}
+
+@keyframes pulse-blue {
+  0%   { box-shadow: 0 0 0 0 rgba(59, 111, 232, 0.6); }
+  70%  { box-shadow: 0 0 0 8px rgba(59, 111, 232, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(59, 111, 232, 0); }
+}
+
+/* ── Marquee (sponsors, testimonial seam) ── */
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+/* ── Fade up (GSAP also does this, CSS version for fallback) ── */
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ── Utility classes ── */
+.animate-blink {
+  animation: blink 1.1s step-end infinite;
+}
+
+.animate-pulse-amber {
+  animation: pulse-amber 2s ease-out infinite;
+}
+
+.animate-pulse-blue {
+  animation: pulse-blue 2s ease-out infinite;
+}
+
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: marquee 28s linear infinite;
+}
+
+.marquee-track:hover {
+  animation-play-state: paused;
+}

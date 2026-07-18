@@ -1,0 +1,43 @@
+// Swap with real project data. Add github/link when available.
+export const PROJECTS = [
+  {
+    id: 1,
+    title: "Crop Yield Predictor",
+    description: "ML pipeline predicting district-level crop yields from satellite NDVI data and rainfall patterns. Deployed as a FastAPI service.",
+    tags: ["Python", "XGBoost", "FastAPI", "Satellite Data"],
+    link: null,
+    github: null,
+    year: "2024",
+    status: "live",
+  },
+  {
+    id: 2,
+    title: "BIT Placement Analytics",
+    description: "End-to-end EDA and dashboard on 4 years of placement data. Surfaced salary trends, branch-wise outcomes, and recruiter patterns.",
+    tags: ["Python", "Pandas", "Plotly", "Streamlit"],
+    link: null,
+    github: null,
+    year: "2024",
+    status: "live",
+  },
+  {
+    id: 3,
+    title: "Fake News Classifier",
+    description: "BERT-based classifier trained on Indian news datasets. 91% accuracy. Submitted to Kaggle competition, ranked top 8%.",
+    tags: ["PyTorch", "HuggingFace", "NLP"],
+    link: null,
+    github: null,
+    year: "2023",
+    status: "live",
+  },
+  {
+    id: 4,
+    title: "Air Quality Dashboard",
+    description: "Real-time Jharkhand AQI monitor using public CPCB API data. Hourly updates, anomaly detection, mobile-first design.",
+    tags: ["Python", "Streamlit", "Time Series"],
+    link: null,
+    github: null,
+    year: "2023",
+    status: "live",
+  },
+];
