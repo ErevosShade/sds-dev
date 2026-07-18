@@ -8,8 +8,10 @@ export default function Testimonials() {
   const [active, setActive]   = useState(0);
   const [prev, setPrev]       = useState(null);
   const [dir, setDir]         = useState(1);
+  const [paused, setPaused]   = useState(false);
   const contentRef            = useRef(null);
-  const timerRef              = useRef(null);
+  const timerRef               = useRef(null);
+  const reduceMotionRef       = useRef(false);
 
   function goTo(idx, direction = 1) {
     if (idx === active) return;
@@ -18,20 +20,29 @@ export default function Testimonials() {
     setActive(idx);
   }
 
-  // Auto-advance every 5s
   useEffect(() => {
+    reduceMotionRef.current = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  }, []);
+
+  // Auto-advance every 5s — paused whenever the user asks (button below) or
+  // prefers reduced motion; an auto-rotating carousel with no way to stop it
+  // fails WCAG 2.2.2 (Pause, Stop, Hide).
+  useEffect(() => {
+    if (paused || reduceMotionRef.current) return;
     timerRef.current = setInterval(() => {
       setActive(a => (a + 1) % TESTIMONIALS.length);
     }, 5000);
     return () => clearInterval(timerRef.current);
-  }, []);
+  }, [paused]);
 
-  // GSAP crossfade on active change
+  // GSAP crossfade on active change — skips the y-offset under reduced motion,
+  // opacity-only instead.
   useEffect(() => {
     if (!contentRef.current) return;
+    const reduce = reduceMotionRef.current;
     gsap.fromTo(contentRef.current,
-      { opacity: 0, y: 20 },
-      { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }
+      { opacity: 0, y: reduce ? 0 : 20 },
+      { opacity: 1, y: 0, duration: reduce ? 0.2 : 0.6, ease: "power3.out" }
     );
   }, [active]);
 
@@ -47,9 +58,23 @@ export default function Testimonials() {
     >
       {/* Main testimonial block */}
       <div style={{ padding: "clamp(80px, 10vw, 140px) clamp(24px, 6vw, 96px)" }}>
-        <p style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-xs)", letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 48 }}>
-          Testimonials
-        </p>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 48 }}>
+          <p style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-xs)", letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--amber)", margin: 0 }}>
+            Testimonials
+          </p>
+          <button
+            onClick={() => setPaused(p => !p)}
+            aria-label={paused ? "Resume auto-advancing testimonials" : "Pause auto-advancing testimonials"}
+            style={{
+              background: "none", border: "1px solid rgba(255,255,255,0.1)",
+              borderRadius: "var(--radius-sm)", padding: "6px 12px",
+              cursor: "pointer",
+              fontFamily: "var(--font-mono)", fontSize: 10,
+              letterSpacing: "0.08em", textTransform: "uppercase",
+              color: "var(--text-muted)",
+            }}
+          >{paused ? "▶ Play" : "❚❚ Pause"}</button>
+        </div>
 
         <div style={{ display: "grid", gridTemplateColumns: "1fr 2fr", gap: "clamp(40px, 6vw, 96px)", alignItems: "start" }}>
           {/* Left — person nav */}
@@ -62,8 +87,8 @@ export default function Testimonials() {
                   background: "none", border: "none", cursor: "pointer",
                   textAlign: "left", padding: "16px 0",
                   borderBottom: "1px solid rgba(255,255,255,0.04)",
-                  display: "flex", alignItems: "center", gap: 14,
-                  transition: "opacity 0.3s ease",
+                  display: "flex", alignItems: "center", gap: 16,
+                  transition: "opacity 0.3s var(--ease-out)",
                   opacity: i === active ? 1 : 0.3,
                 }}
               >
@@ -72,17 +97,17 @@ export default function Testimonials() {
                   width: 36, height: 36, borderRadius: "50%", flexShrink: 0,
                   background: i === active ? item.color : "var(--surface)",
                   display: "flex", alignItems: "center", justifyContent: "center",
-                  transition: "background 0.4s ease",
+                  transition: "background 0.4s var(--ease-out)",
                 }}>
-                  <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: i === active ? "#fff" : "var(--text-dim)", fontWeight: 500 }}>
+                  <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: i === active ? "#fff" : "var(--text-muted)", fontWeight: 500 }}>
                     {item.initials}
                   </span>
                 </div>
                 <div>
-                  <div style={{ fontFamily: "var(--font-body)", fontSize: "var(--text-sm)", color: i === active ? "var(--paper-white)" : "rgba(238,233,220,0.4)", fontWeight: 500, transition: "color 0.3s" }}>
+                  <div style={{ fontFamily: "var(--font-body)", fontSize: "var(--text-sm)", color: i === active ? "var(--paper-white)" : "rgba(238,233,220,0.4)", fontWeight: 500, transition: "color 0.3s var(--ease-out)" }}>
                     {item.name}
                   </div>
-                  <div style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--text-dim)", letterSpacing: "0.04em", marginTop: 2 }}>
+                  <div style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.04em", marginTop: 2 }}>
                     {item.tag}
                   </div>
                 </div>
@@ -104,7 +129,7 @@ export default function Testimonials() {
               fontStyle: "italic",
               color: "var(--paper-white)",
               lineHeight: 1.55,
-              margin: 0, marginBottom: 36,
+              margin: 0, marginBottom: 32,
               maxWidth: 700,
             }}>
               {t.quote}
@@ -130,7 +155,7 @@ export default function Testimonials() {
               <div style={{
                 width: i === active ? 28 : 6, height: 2,
                 background: i === active ? t.color : "rgba(255,255,255,0.15)",
-                borderRadius: 2, transition: "all 0.4s ease",
+                borderRadius: 2, transition: "all 0.4s var(--ease-out)",
               }} />
             </button>
           ))}

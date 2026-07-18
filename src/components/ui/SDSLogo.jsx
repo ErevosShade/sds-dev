@@ -5,7 +5,7 @@
  * Props: size (height in px), showWordmark (bool), wordmarkColor
  */
 const SDSLogo = ({ size = 32, showWordmark = false, className = "" }) => (
-  <div style={{ display: "flex", alignItems: "center", gap: 10 }} className={className}>
+  <div style={{ display: "flex", alignItems: "center", gap: 8 }} className={className}>
     <svg
       width={size * 1.4}
       height={size}

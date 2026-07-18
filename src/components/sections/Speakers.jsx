@@ -10,10 +10,30 @@ export default function Speakers() {
   const bookRef    = useRef(null);
   const pageRefs   = useRef([]);
   const [active, setActive] = useState(0);
+  const reducedMotionRef = useRef(false);
+
+  // Reveals speaker `idx` by setting each page's turned/unturned state directly —
+  // used both for the reduced-motion click path and as the instant "get in sync"
+  // step whenever a dot is clicked.
+  const showSpeaker = (idx) => {
+    setActive(idx);
+    pageRefs.current.forEach((page, i) => {
+      if (page) page.style.transform = `rotateY(${i < idx ? -180 : 0}deg)`;
+    });
+  };
 
   useEffect(() => {
     const section = sectionRef.current;
     if (!section || pageRefs.current.length === 0) return;
+
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    reducedMotionRef.current = reduce;
+
+    // Reduced motion: skip the scroll-jacking pin and the 3D page-flip
+    // animation entirely. The book displays speaker 0 by default; the
+    // progress dots below become plain click targets (via showSpeaker) so
+    // every speaker is still reachable without any motion.
+    if (reduce) return;
 
     const ctx = gsap.context(() => {
       const tl = gsap.timeline({
@@ -54,7 +74,7 @@ export default function Speakers() {
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
-        padding: "60px clamp(24px, 6vw, 80px)",
+        padding: "64px clamp(24px, 6vw, 80px)",
         overflow: "hidden",
       }}
     >
@@ -100,7 +120,7 @@ export default function Speakers() {
               display: "flex", flexDirection: "column", justifyContent: "center",
               background: "var(--surface-raised)",
             }}>
-              <p style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--text-dim)", letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 20 }}>
+              <p style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 20 }}>
                 {SPEAKERS[active]?.chapter}
               </p>
               <h3 style={{ fontFamily: "var(--font-display)", fontSize: "clamp(20px, 2.5vw, 32px)", fontWeight: 400, color: "var(--paper-white)", lineHeight: 1.2, marginBottom: 12 }}>
@@ -136,7 +156,7 @@ export default function Speakers() {
                 {SPEAKERS[active]?.quote}
               </blockquote>
 
-              {/* Placeholder photo */}
+              {/* Headshot — falls back to a "Photo" placeholder box if image is null */}
               <div style={{
                 marginTop: "auto", paddingTop: 28,
                 width: "clamp(60px, 8vw, 90px)", height: "clamp(60px, 8vw, 90px)",
@@ -144,8 +164,12 @@ export default function Speakers() {
                 background: "var(--surface-raised)",
                 border: "1px solid rgba(255,255,255,0.08)",
                 display: "flex", alignItems: "center", justifyContent: "center",
+                overflow: "hidden",
               }}>
-                <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-xs)", color: "var(--text-muted)" }}>Photo</span>
+                {SPEAKERS[active]?.image
+                  ? <img src={SPEAKERS[active].image} alt={SPEAKERS[active].name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                  : <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-xs)", color: "var(--text-muted)" }}>Photo</span>
+                }
               </div>
             </div>
           </div>
@@ -190,16 +214,28 @@ export default function Speakers() {
           ))}
         </div>
 
-        {/* Progress dots */}
+        {/* Progress dots — also click targets, so reduced-motion users (and
+            anyone else) can jump straight to a speaker */}
         <div style={{ display: "flex", justifyContent: "center", gap: 8, marginTop: 28 }}>
           {SPEAKERS.map((_, i) => (
-            <div key={i} style={{
-              width: i === active ? 24 : 6,
-              height: 2,
-              background: i === active ? "var(--data-blue)" : "rgba(255,255,255,0.15)",
-              borderRadius: 2,
-              transition: "width 0.4s ease, background 0.3s ease",
-            }} />
+            <button
+              key={i}
+              onClick={() => showSpeaker(i)}
+              aria-label={`Show ${SPEAKERS[i].name}, ${SPEAKERS[i].chapter}`}
+              aria-current={i === active}
+              style={{
+                width: 24,
+                height: 2,
+                background: i === active ? "var(--data-blue)" : "rgba(255,255,255,0.15)",
+                borderRadius: 2,
+                border: "none",
+                padding: 0,
+                cursor: "pointer",
+                transform: `scaleX(${i === active ? 1 : 0.25})`,
+                transformOrigin: "left center",
+                transition: "transform 0.4s var(--ease-out), background 0.3s var(--ease-out)",
+              }}
+            />
           ))}
         </div>
       </div>

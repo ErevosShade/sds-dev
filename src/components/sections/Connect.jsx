@@ -49,7 +49,7 @@ export default function Connect() {
                 padding: "16px 0",
                 borderBottom: "1px solid rgba(255,255,255,0.05)",
                 textDecoration: "none",
-                transition: "opacity 0.2s",
+                transition: "opacity 0.2s var(--ease-out)",
                 opacity: 1,
                 cursor: "pointer",
               }}
@@ -64,7 +64,7 @@ export default function Connect() {
 
           {/* Contact info */}
           <div style={{ marginTop: 40, paddingTop: 32, borderTop: "1px solid rgba(255,255,255,0.04)" }}>
-            <p style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-xs)", color: "var(--text-dim)", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 8 }}>
+            <p style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-xs)", color: "var(--text-muted)", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 8 }}>
               Email
             </p>
             <a href="mailto:sds@bitmesra.ac.in" style={{ fontFamily: "var(--font-body)", fontSize: "var(--text-base)", color: "var(--data-blue)", textDecoration: "none" }}>
@@ -96,7 +96,7 @@ export default function Connect() {
                 { field: "branch",  label: "Branch",  placeholder: "CSE / ECE / MCA / ...", type: "text" },
               ].map(({ field, label, placeholder, type }) => (
                 <div key={field} style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                  <label style={{ fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-dim)" }}>
+                  <label style={{ fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)" }}>
                     {label}
                   </label>
                   <input
@@ -113,7 +113,7 @@ export default function Connect() {
                       borderRadius: "var(--radius-sm)",
                       padding: "12px 16px",
                       outline: "none",
-                      transition: "border-color 0.2s",
+                      transition: "border-color 0.2s var(--ease-out)",
                     }}
                     onFocus={e => e.target.style.borderColor = "var(--data-blue)"}
                     onBlur={e => e.target.style.borderColor = "rgba(255,255,255,0.08)"}
@@ -122,7 +122,7 @@ export default function Connect() {
               ))}
 
               <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                <label style={{ fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-dim)" }}>
+                <label style={{ fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)" }}>
                   Message (optional)
                 </label>
                 <textarea
@@ -138,7 +138,7 @@ export default function Connect() {
                     borderRadius: "var(--radius-sm)",
                     padding: "12px 16px",
                     outline: "none", resize: "vertical",
-                    transition: "border-color 0.2s",
+                    transition: "border-color 0.2s var(--ease-out)",
                   }}
                   onFocus={e => e.target.style.borderColor = "var(--data-blue)"}
                   onBlur={e => e.target.style.borderColor = "rgba(255,255,255,0.08)"}
@@ -154,11 +154,11 @@ export default function Connect() {
                   background: "var(--data-blue)",
                   border: "1px solid var(--data-blue)",
                   borderRadius: "var(--radius-sm)",
-                  padding: "13px 28px",
+                  padding: "12px 28px",
                   cursor: "pointer",
                   marginTop: 4,
                   alignSelf: "flex-start",
-                  transition: "opacity 0.2s",
+                  transition: "opacity 0.2s var(--ease-out)",
                 }}
                 onMouseEnter={e => e.currentTarget.style.opacity = "0.85"}
                 onMouseLeave={e => e.currentTarget.style.opacity = "1"}
@@ -174,7 +174,7 @@ export default function Connect() {
         @media (max-width: 768px) {
           #connect > div > div { grid-template-columns: 1fr !important; }
         }
-        input::placeholder, textarea::placeholder { color: rgba(238,233,220,0.2); }
+        input::placeholder, textarea::placeholder { color: rgba(238,233,220,0.5); }
       `}</style>
     </section>
   );

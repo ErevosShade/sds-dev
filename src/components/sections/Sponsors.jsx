@@ -13,10 +13,10 @@ export default function Sponsors() {
         padding: "clamp(64px, 8vw, 112px) clamp(24px, 6vw, 96px)",
       }}
     >
-      <p style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-xs)", letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 14 }}>
+      <p style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-xs)", letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 16 }}>
         Sponsors
       </p>
-      <h2 ref={headRef} style={{ fontFamily: "var(--font-display)", fontSize: "clamp(24px, 3.5vw, 44px)", fontWeight: 400, color: "var(--paper-white)", marginBottom: 56, lineHeight: 1.1 }}>
+      <h2 ref={headRef} style={{ fontFamily: "var(--font-display)", fontSize: "clamp(24px, 3.5vw, 44px)", fontWeight: 400, color: "var(--paper-white)", marginBottom: 48, lineHeight: 1.1 }}>
         Trusted by organisations<br />
         <em style={{ color: "rgba(238,233,220,0.38)", fontStyle: "italic" }}>that care about data.</em>
       </h2>
@@ -30,7 +30,7 @@ export default function Sponsors() {
             <p style={{
               fontFamily: "var(--font-mono)", fontSize: 10,
               letterSpacing: "0.14em", textTransform: "uppercase",
-              color: "var(--text-dim)", marginBottom: 20,
+              color: "var(--text-muted)", marginBottom: 24,
             }}>{config.label}</p>
 
             {/* Double marquee for each tier */}
@@ -46,14 +46,14 @@ export default function Sponsors() {
                     borderRadius: "var(--radius-sm)",
                     display: "flex", alignItems: "center", justifyContent: "center",
                     textDecoration: "none",
-                    transition: "opacity 0.2s",
+                    transition: "opacity 0.2s var(--ease-out)",
                   }}
                     onMouseEnter={e => e.currentTarget.style.opacity = "0.7"}
                     onMouseLeave={e => e.currentTarget.style.opacity = "1"}
                   >
                     {s.logo
                       ? <img src={s.logo} alt={s.name} style={{ height: config.logoHeight * 0.6, objectFit: "contain", filter: "brightness(0) invert(1)", opacity: 0.6 }} />
-                      : <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--text-dim)", letterSpacing: "0.08em" }}>{s.name}</span>
+                      : <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.08em" }}>{s.name}</span>
                     }
                   </a>
                 ))}

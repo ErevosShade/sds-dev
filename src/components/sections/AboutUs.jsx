@@ -83,7 +83,7 @@ export default function AboutUs() {
             fontSize: "var(--text-xs)",
             letterSpacing: "0.14em",
             textTransform: "uppercase",
-            color: "var(--text-dim)",
+            color: "var(--text-muted)",
             marginBottom: 24,
           }}>
             How it works

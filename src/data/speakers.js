@@ -9,7 +9,7 @@ export const SPEAKERS = [
     org: "Google DeepMind",
     topic: "Scaling Laws in Practice",
     quote: "The model doesn't know what it doesn't know. That's your job.",
-    image: null,
+    image: "/images/speakers/01-speaker-name.svg",
   },
   {
     id: 2,
@@ -19,7 +19,7 @@ export const SPEAKERS = [
     org: "Zomato",
     topic: "ML in Production: What Nobody Tells You",
     quote: "Your Jupyter notebook is not a product.",
-    image: null,
+    image: "/images/speakers/02-speaker-name.svg",
   },
   {
     id: 3,
@@ -29,6 +29,6 @@ export const SPEAKERS = [
     org: "Independent",
     topic: "Feature Engineering at Scale",
     quote: "Data cleaning is 80% of the work and 0% of the glory.",
-    image: null,
+    image: "/images/speakers/03-speaker-name.svg",
   },
 ];

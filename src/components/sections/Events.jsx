@@ -22,8 +22,13 @@ export default function Events() {
   const nameRefs    = useRef([]);
   const [active, setActive]   = useState(0);
   const activeRef = useRef(0);
+  const [reduceMotion, setReduceMotion] = useState(false);
 
   const ROW_HEIGHT = 76;
+
+  useEffect(() => {
+    setReduceMotion(window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+  }, []);
 
   // Scroll pins the section, drives which event is active, turns the big
   // background compass, and glides the vertical name wheel — one continuous
@@ -34,6 +39,11 @@ export default function Events() {
     const section = sectionRef.current;
     const dial = dialRef.current;
     if (!section || !dial) return;
+
+    // Reduced motion: no pin/scroll-jack, no dial rotation, no gliding name
+    // wheel. The ring sits static as background decoration; the event names
+    // render as a plain clickable list instead (see the JSX below).
+    if (reduceMotion) return;
 
     const total = EVENTS.length;
     const SWEEP_DEG = -360; // reversed — one full, clearly-visible glide the other way
@@ -100,7 +110,7 @@ export default function Events() {
     }, section);
 
     return () => ctx.revert();
-  }, []);
+  }, [reduceMotion]);
 
   const event = EVENTS[active];
 
@@ -191,7 +201,7 @@ export default function Events() {
                     cx="150" cy={150 - 140}
                     r={isActive ? 5 : 3}
                     fill={isActive ? BLUE : "rgba(255,255,255,0.15)"}
-                    style={{ transition: "all 0.4s ease", filter: isActive ? `drop-shadow(0 0 6px ${BLUE})` : "none" }}
+                    style={{ transition: "all 0.4s var(--ease-out)", filter: isActive ? `drop-shadow(0 0 6px ${BLUE})` : "none" }}
                   />
                 </g>
               );
@@ -212,30 +222,53 @@ export default function Events() {
             color: BLUE, margin: 0,
           }}>Events</p>
 
-          {/* Event name wheel — sits in the gap between the dial and the card, nudged right.
-              Glides continuously with scroll; the current name is sharp, neighbors drift
-              off-center and blur out, like a picker on a physical dial. */}
-          <div style={{ position: "absolute", top: "50%", left: 0, right: 0, transform: "translateY(-50%) translateX(104px)", height: 260, overflow: "hidden" }}>
-            {EVENTS.map((ev, i) => (
-              <h3
-                key={i}
-                ref={(el) => (nameRefs.current[i] = el)}
-                style={{
-                  position: "absolute", top: "50%", right: 0,
-                  width: "min(52%, 280px)",
-                  textAlign: "right",
-                  fontFamily: "var(--font-display)",
-                  fontSize: "clamp(22px, 2.4vw, 32px)",
-                  fontWeight: 400,
-                  color: "var(--paper-white)",
-                  lineHeight: 1.2,
-                  margin: 0,
-                  overflowWrap: "break-word",
-                  willChange: "transform, filter, opacity",
-                }}
-              >{ev.title}</h3>
-            ))}
-          </div>
+          {reduceMotion ? (
+            /* Reduced motion: a plain clickable list instead of the gliding wheel —
+               no scroll-jacking, no auto-driven transforms. */
+            <div style={{ position: "absolute", top: "50%", left: 0, right: 0, transform: "translateY(-50%)", display: "flex", flexDirection: "column", gap: 8 }}>
+              {EVENTS.map((ev, i) => (
+                <button
+                  key={i}
+                  onClick={() => setActive(i)}
+                  aria-current={i === active}
+                  style={{
+                    background: "none", border: "none", cursor: "pointer",
+                    textAlign: "right", padding: "4px 0",
+                    fontFamily: "var(--font-display)",
+                    fontSize: "clamp(18px, 2vw, 26px)",
+                    fontWeight: 400,
+                    color: i === active ? "var(--paper-white)" : BLUE,
+                    opacity: i === active ? 1 : 0.5,
+                  }}
+                >{ev.title}</button>
+              ))}
+            </div>
+          ) : (
+            /* Event name wheel — sits in the gap between the dial and the card, nudged right.
+                Glides continuously with scroll; the current name is sharp, neighbors drift
+                off-center and blur out, like a picker on a physical dial. */
+            <div style={{ position: "absolute", top: "50%", left: 0, right: 0, transform: "translateY(-50%) translateX(104px)", height: 260, overflow: "hidden" }}>
+              {EVENTS.map((ev, i) => (
+                <h3
+                  key={i}
+                  ref={(el) => (nameRefs.current[i] = el)}
+                  style={{
+                    position: "absolute", top: "50%", right: 0,
+                    width: "min(52%, 280px)",
+                    textAlign: "right",
+                    fontFamily: "var(--font-display)",
+                    fontSize: "clamp(22px, 2.4vw, 32px)",
+                    fontWeight: 400,
+                    color: "var(--paper-white)",
+                    lineHeight: 1.2,
+                    margin: 0,
+                    overflowWrap: "break-word",
+                    willChange: "transform, filter, opacity",
+                  }}
+                >{ev.title}</h3>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* RIGHT — Event detail card. The shell mounts once (no key={active} here) —
@@ -301,17 +334,17 @@ export default function Events() {
               marginBottom: 32,
             }}>{event?.description}</p>
 
-            <div style={{ display: "flex", flexDirection: "column", gap: 10, borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: 24, marginTop: "auto" }}>
-              <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-                <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--text-dim)", letterSpacing: "0.08em", textTransform: "uppercase", minWidth: 48 }}>Date</span>
+            <div style={{ display: "flex", flexDirection: "column", gap: 8, borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: 24, marginTop: "auto" }}>
+              <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.08em", textTransform: "uppercase", minWidth: 48 }}>Date</span>
                 <span style={{ fontFamily: "var(--font-body)", fontSize: "var(--text-sm)", color: "rgba(238,233,220,0.55)" }}>{event?.date}</span>
               </div>
-              <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-                <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--text-dim)", letterSpacing: "0.08em", textTransform: "uppercase", minWidth: 48 }}>Venue</span>
+              <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.08em", textTransform: "uppercase", minWidth: 48 }}>Venue</span>
                 <span style={{ fontFamily: "var(--font-body)", fontSize: "var(--text-sm)", color: "rgba(238,233,220,0.55)" }}>{event?.venue}</span>
               </div>
-              <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-                <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--text-dim)", letterSpacing: "0.08em", textTransform: "uppercase", minWidth: 48 }}>Coord</span>
+              <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.08em", textTransform: "uppercase", minWidth: 48 }}>Coord</span>
                 <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-sm)", color: BLUE }}>{event?.coordinate}</span>
               </div>
             </div>

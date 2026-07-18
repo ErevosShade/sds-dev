@@ -73,7 +73,7 @@ export default function Navbar() {
         borderColor: "rgba(238,233,220,0)",
         backdropFilter: floating ? "blur(18px) saturate(140%)" : "none",
         WebkitBackdropFilter: floating ? "blur(18px) saturate(140%)" : "none",
-        transition: "backdrop-filter 0.5s ease",
+        transition: "backdrop-filter 0.5s var(--ease-out)",
       }}
     >
       {/* Logo */}
@@ -82,7 +82,7 @@ export default function Navbar() {
       </Link>
 
       {/* Desktop links */}
-      <div style={{ display: "flex", alignItems: "center", gap: 36 }} className="sds-nav-links">
+      <div style={{ display: "flex", alignItems: "center", gap: 32 }} className="sds-nav-links">
         {NAV_LINKS.map(({ label, to }) => (
           <a
             key={label}
@@ -95,7 +95,7 @@ export default function Navbar() {
               textTransform: "uppercase",
               color: "rgba(238,233,220,0.55)",
               textDecoration: "none",
-              transition: "color 0.2s ease",
+              transition: "color 0.2s var(--ease-out)",
               cursor: "pointer",
             }}
             onMouseEnter={e => e.target.style.color = "var(--paper-white)"}
@@ -118,7 +118,7 @@ export default function Navbar() {
           padding: "8px 20px",
           border: "1px solid rgba(255,255,255,0.18)",
           borderRadius: "var(--radius-sm)",
-          transition: "background 0.2s ease, border-color 0.2s ease",
+          transition: "background 0.2s var(--ease-out), border-color 0.2s var(--ease-out)",
         }}
         onMouseEnter={e => {
           e.currentTarget.style.background = "var(--data-blue)";
@@ -140,7 +140,7 @@ export default function Navbar() {
         style={{ display: "none", flexDirection: "column", gap: 5, background: "none", border: "none", cursor: "pointer", padding: 8 }}
       >
         {[0,1,2].map(i => (
-          <span key={i} style={{ display: "block", width: 22, height: 1.5, background: "var(--paper-white)", transition: "all 0.3s ease",
+          <span key={i} style={{ display: "block", width: 22, height: 1.5, background: "var(--paper-white)", transition: "all 0.3s var(--ease-out)",
             transform: menuOpen ? (i===0 ? "rotate(45deg) translateY(9px)" : i===2 ? "rotate(-45deg) translateY(-9px)" : "scaleX(0)") : "none",
           }} />
         ))}

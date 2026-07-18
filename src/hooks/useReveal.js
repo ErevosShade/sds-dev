@@ -17,11 +17,13 @@ export const useReveal = (options = {}) => {
     if (!ref.current) return;
 
     const el = ref.current;
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
     const ctx = gsap.context(() => {
       gsap.from(el, {
         opacity: 0,
-        y: 32,
-        duration: 0.9,
+        y: reduce ? 0 : 32,
+        duration: reduce ? 0.3 : 0.9,
         ease: "power3.out",
         ...options,
         scrollTrigger: {

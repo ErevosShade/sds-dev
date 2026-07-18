@@ -66,7 +66,7 @@ export default function Footer() {
           <p style={{
             fontFamily: "var(--font-body)", fontSize: "var(--text-sm)",
             color: "rgba(238,233,220,0.35)", lineHeight: 1.7,
-            marginTop: 16, marginBottom: 36, maxWidth: 260,
+            marginTop: 16, marginBottom: 32, maxWidth: 260,
           }}>
             Society for Data Science, BIT Mesra.<br />
             Est. 2019 · Ranchi, Jharkhand.
@@ -75,7 +75,7 @@ export default function Footer() {
           <div style={{ display: "flex", gap: 40 }}>
             {NAV_COLS.map(col => (
               <div key={col.title}>
-                <p style={{ fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--text-dim)", marginBottom: 14 }}>
+                <p style={{ fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 16 }}>
                   {col.title}
                 </p>
                 <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
@@ -83,7 +83,7 @@ export default function Footer() {
                     <a key={label} href={href} style={{
                       fontFamily: "var(--font-body)", fontSize: "var(--text-sm)",
                       color: "rgba(238,233,220,0.4)", textDecoration: "none",
-                      transition: "color 0.2s",
+                      transition: "color 0.2s var(--ease-out)",
                     }}
                       onMouseEnter={e => e.currentTarget.style.color = "var(--paper-white)"}
                       onMouseLeave={e => e.currentTarget.style.color = "rgba(238,233,220,0.4)"}
@@ -97,7 +97,7 @@ export default function Footer() {
 
         {/* Col 2 — Social + contact */}
         <div>
-          <p style={{ fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--text-dim)", marginBottom: 14 }}>
+          <p style={{ fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 16 }}>
             Connect
           </p>
           <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
@@ -107,7 +107,7 @@ export default function Footer() {
                 padding: "12px 0",
                 borderBottom: "1px solid rgba(255,255,255,0.04)",
                 textDecoration: "none",
-                transition: "opacity 0.2s",
+                transition: "opacity 0.2s var(--ease-out)",
               }}
                 onMouseEnter={e => e.currentTarget.style.opacity = "0.5"}
                 onMouseLeave={e => e.currentTarget.style.opacity = "1"}
@@ -117,8 +117,8 @@ export default function Footer() {
               </a>
             ))}
           </div>
-          <div style={{ marginTop: 28 }}>
-            <p style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--text-dim)", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 6 }}>Mail</p>
+          <div style={{ marginTop: 24 }}>
+            <p style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 6 }}>Mail</p>
             <a href="mailto:sds@bitmesra.ac.in" style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-sm)", color: "var(--data-blue)", textDecoration: "none" }}>
               sds@bitmesra.ac.in
             </a>
@@ -135,7 +135,7 @@ export default function Footer() {
         }}>
           {/* Title bar */}
           <div style={{
-            padding: "10px 16px",
+            padding: "8px 16px",
             borderBottom: "1px solid rgba(255,255,255,0.06)",
             display: "flex", alignItems: "center", justifyContent: "space-between",
             background: "var(--surface-raised)",
@@ -155,13 +155,13 @@ export default function Footer() {
             {NOTEBOOK_LINES.map((line, i) => (
               <div key={i}>
                 {line.code && (
-                  <div style={{ display: "flex", gap: 10 }}>
+                  <div style={{ display: "flex", gap: 8 }}>
                     <span style={{ color: "rgba(232,137,74,0.6)", minWidth: 52, textAlign: "right", flexShrink: 0 }}>{line.prompt}</span>
                     <span style={{ color: "rgba(238,233,220,0.6)" }}>{line.code}</span>
                   </div>
                 )}
                 {line.output && line.output.map((o, j) => (
-                  <div key={j} style={{ display: "flex", gap: 10 }}>
+                  <div key={j} style={{ display: "flex", gap: 8 }}>
                     <span style={{ color: "rgba(59,111,232,0.5)", minWidth: 52, textAlign: "right", flexShrink: 0 }}>
                       {j === 0 ? line.prompt : ""}
                     </span>
@@ -176,7 +176,7 @@ export default function Footer() {
             ))}
 
             {/* Blinking cursor */}
-            <div style={{ display: "flex", gap: 10, marginTop: 4 }}>
+            <div style={{ display: "flex", gap: 8, marginTop: 4 }}>
               <span style={{ color: "rgba(232,137,74,0.6)", minWidth: 52, textAlign: "right" }}>In [3]:</span>
               <span className="animate-blink" style={{ color: "rgba(238,233,220,0.5)" }}>█</span>
             </div>
