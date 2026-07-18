@@ -2,8 +2,6 @@ import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { TESTIMONIALS } from "../../data/testimonials";
 
-const MARQUEE_ITEMS = ["Google", "BCG Gamma", "Zomato", "Razorpay", "Groww", "Kaggle GM", "DRDO", "Goldman Sachs", "Microsoft", "Amazon", "IIT Research"];
-
 export default function Testimonials() {
   const [active, setActive]   = useState(0);
   const [prev, setPrev]       = useState(null);
@@ -166,32 +164,6 @@ export default function Testimonials() {
                 borderRadius: 2, transition: "all 0.4s var(--ease-out)",
               }} />
             </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Marquee seam — bleeds edge to edge, zero gap */}
-      <div style={{
-        overflow: "hidden",
-        borderTop: "1px solid rgba(255,255,255,0.04)",
-        borderBottom: "1px solid rgba(255,255,255,0.04)",
-        padding: "14px 0",
-        background: "var(--surface)",
-      }}>
-        <div className="marquee-track" style={{ gap: 48 }}>
-          {[...MARQUEE_ITEMS, ...MARQUEE_ITEMS].map((item, i) => (
-            <span key={i} style={{
-              fontFamily: "var(--font-mono)",
-              fontSize: "var(--text-xs)",
-              letterSpacing: "0.16em",
-              textTransform: "uppercase",
-              color: "rgba(238,233,220,0.25)",
-              whiteSpace: "nowrap",
-              flexShrink: 0,
-            }}>
-              {item}
-              <span style={{ marginLeft: 48, color: "rgba(255,255,255,0.08)" }}>·</span>
-            </span>
           ))}
         </div>
       </div>

@@ -78,9 +78,12 @@ export default function Gallery() {
         padding: reduceMotion ? "40px 0" : 0,
       }}
     >
-      {/* Header — fixed inside section (in flow when reduced motion) */}
+      {/* Header — fixed inside section (in flow when reduced motion). Pinned
+          sections occupy the viewport from y:0, so the header needs enough
+          top offset to clear the fixed navbar (~64px tall, plus its own
+          14px margin when floating) instead of sitting under/behind it. */}
       <div style={{
-        position: reduceMotion ? "relative" : "absolute", top: reduceMotion ? "auto" : 40,
+        position: reduceMotion ? "relative" : "absolute", top: reduceMotion ? "auto" : "clamp(96px, 14vh, 140px)",
         left: reduceMotion ? "auto" : "clamp(24px, 6vw, 96px)",
         padding: reduceMotion ? "0 clamp(24px, 6vw, 96px)" : 0,
         marginBottom: reduceMotion ? 24 : 0,
@@ -124,15 +127,21 @@ export default function Gallery() {
       )}
 
       {/* Horizontal track — natively scrollable (user-controlled, no forced
-          motion) when reduced motion is preferred, instead of scroll-jacked */}
+          motion) when reduced motion is preferred, instead of scroll-jacked.
+          Pinned between top (header clearance) AND bottom (caption/progress-
+          dots clearance) rather than just offset-from-top — that centers the
+          cards in the actual empty band between the title and the bottom
+          text, instead of centering across the whole remaining height
+          (which skews toward the bottom row since that row eats into it). */}
       <div
         ref={trackRef}
         style={{
           position: reduceMotion ? "relative" : "absolute",
-          top: 0, left: 0,
+          top: reduceMotion ? "auto" : "clamp(220px, 28vh, 280px)",
+          bottom: reduceMotion ? "auto" : "clamp(80px, 10vh, 110px)",
+          left: 0,
           display: "flex",
           alignItems: "center",
-          height: reduceMotion ? "auto" : "100%",
           overflowX: reduceMotion ? "auto" : "visible",
           paddingLeft: "clamp(24px, 6vw, 96px)",
           gap: 16,
@@ -147,14 +156,16 @@ export default function Gallery() {
             key={item.id}
             style={{
               flexShrink: 0,
-              height: item.aspect === "portrait" ? "clamp(320px, 55vh, 520px)" : "clamp(240px, 40vh, 380px)",
-              width: item.aspect === "portrait" ? "clamp(200px, 22vw, 320px)" : "clamp(320px, 36vw, 520px)",
+              // Uniform size for every card — no more portrait/landscape
+              // variance or zigzag stagger, all cards sit on the same baseline.
+              height: "clamp(340px, 52vh, 560px)",
+              width: "clamp(300px, 38vw, 600px)",
               background: PLACEHOLDER_COLORS[i],
-              border: "1px solid rgba(255,255,255,0.06)",
-              borderRadius: "var(--radius-md)",
+              borderRadius: 24,
               overflow: "hidden",
               position: "relative",
-              marginTop: i % 2 === 0 ? 0 : "clamp(20px, 3vh, 48px)",
+              border: "1px solid rgba(255,255,255,0.14)",
+              boxShadow: "inset 0 1px 0 rgba(255,255,255,0.18)",
             }}
           >
             {item.src
@@ -174,6 +185,13 @@ export default function Gallery() {
                 </div>
               )
             }
+
+            {/* Glass sheen — a soft highlight in the top-left corner, like light
+                catching a glass edge, plus the border/inset-shadow above. */}
+            <div style={{
+              position: "absolute", inset: 0, pointerEvents: "none",
+              background: "linear-gradient(135deg, rgba(255,255,255,0.16) 0%, transparent 35%)",
+            }} />
 
             {/* Hover overlay */}
             <div style={{
@@ -201,10 +219,10 @@ export default function Gallery() {
         {/* "See all photos" link at end of track */}
         <a href="/gallery" className="btn-press" style={{
           flexShrink: 0, textDecoration: "none",
-          height: "clamp(240px, 40vh, 380px)",
+          height: "clamp(340px, 52vh, 560px)",
           width: "clamp(180px, 18vw, 260px)",
           border: "1px solid rgba(255,255,255,0.08)",
-          borderRadius: "var(--radius-md)",
+          borderRadius: 24,
           display: "flex", flexDirection: "column",
           alignItems: "center", justifyContent: "center", gap: 12,
           transition: "border-color 0.3s var(--ease-out), background 0.3s var(--ease-out)",
