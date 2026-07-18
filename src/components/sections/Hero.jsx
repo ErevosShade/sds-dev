@@ -124,14 +124,18 @@ export default function Hero() {
     return () => { if (rafId) cancelAnimationFrame(rafId); wrap.removeEventListener("mousemove", onMove); wrap.removeEventListener("mouseleave", onLeave); };
   }, []);
 
-  // GSAP text entrance
+  // GSAP text entrance — scoped to wrapRef (the whole section), not textRef,
+  // since .hero-stats is a sibling of textRef's div, not a descendant of it.
+  // Scoping to textRef meant gsap's selector lookup could never find
+  // ".hero-stats" (logged as "GSAP target .hero-stats not found"), so the
+  // stats fade-in silently never ran.
   useEffect(() => {
     const ctx = gsap.context(() => {
       gsap.from(".hero-line", { opacity: 0, y: 40, duration: 1.1, ease: "power3.out", stagger: 0.12, delay: 0.3 });
       gsap.from(".hero-sub",  { opacity: 0, y: 20, duration: 0.9, ease: "power3.out", delay: 0.8 });
       gsap.from(".hero-cta",  { opacity: 0, y: 16, duration: 0.8, ease: "power3.out", delay: 1.1 });
       gsap.from(".hero-stats", { opacity: 0, duration: 0.8, delay: 1.3 });
-    }, textRef);
+    }, wrapRef);
     return () => ctx.revert();
   }, []);
 

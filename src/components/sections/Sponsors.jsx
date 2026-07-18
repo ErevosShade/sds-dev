@@ -1,8 +1,8 @@
-import { useReveal } from "../../hooks/useReveal";
+import { useTextReveal } from "../../hooks/useTextReveal";
 import { SPONSORS, TIER_CONFIG } from "../../data/sponsors";
 
 export default function Sponsors() {
-  const headRef = useReveal();
+  const headRef = useTextReveal();
   const tiers = ["platinum", "gold", "silver"];
 
   return (

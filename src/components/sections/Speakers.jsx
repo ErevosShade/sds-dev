@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SPEAKERS } from "../../data/speakers";
+import { useTextReveal } from "../../hooks/useTextReveal";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -11,6 +12,7 @@ export default function Speakers() {
   const pageRefs   = useRef([]);
   const [active, setActive] = useState(0);
   const reducedMotionRef = useRef(false);
+  const headRef = useTextReveal();
 
   // Reveals speaker `idx` by setting each page's turned/unturned state directly —
   // used both for the reduced-motion click path and as the instant "get in sync"
@@ -85,7 +87,7 @@ export default function Speakers() {
             <p style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-xs)", letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 12 }}>
               The Reading List
             </p>
-            <h2 style={{ fontFamily: "var(--font-display)", fontSize: "clamp(28px, 4vw, 52px)", fontWeight: 400, color: "var(--paper-white)", lineHeight: 1.1 }}>
+            <h2 ref={headRef} style={{ fontFamily: "var(--font-display)", fontSize: "clamp(28px, 4vw, 52px)", fontWeight: 400, color: "var(--paper-white)", lineHeight: 1.1 }}>
               Voices from the field.
             </h2>
           </div>

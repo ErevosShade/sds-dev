@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { useReveal } from "../../hooks/useReveal";
+import { useTextReveal } from "../../hooks/useTextReveal";
 
 const SOCIAL_LINKS = [
   { label: "Instagram", handle: "@sds.bitmesra", url: "#", color: "var(--amber)" },
@@ -8,7 +8,7 @@ const SOCIAL_LINKS = [
 ];
 
 export default function Connect() {
-  const headRef = useReveal();
+  const headRef = useTextReveal();
   const [submitted, setSubmitted] = useState(false);
   const [form, setForm] = useState({ name: "", email: "", branch: "", message: "" });
 

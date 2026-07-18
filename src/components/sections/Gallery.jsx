@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useTextReveal } from "../../hooks/useTextReveal";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -23,6 +24,7 @@ export default function Gallery() {
   const trackRef    = useRef(null);
   const labelRef    = useRef(null);
   const [reduceMotion, setReduceMotion] = useState(false);
+  const headRef = useTextReveal();
 
   useEffect(() => {
     setReduceMotion(window.matchMedia("(prefers-reduced-motion: reduce)").matches);
@@ -87,7 +89,7 @@ export default function Gallery() {
         <p style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-xs)", letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8 }}>
           Gallery
         </p>
-        <h2 style={{ fontFamily: "var(--font-display)", fontSize: "clamp(24px, 3vw, 40px)", fontWeight: 400, color: "var(--paper-white)", lineHeight: 1.1 }}>
+        <h2 ref={headRef} style={{ fontFamily: "var(--font-display)", fontSize: "clamp(24px, 3vw, 40px)", fontWeight: 400, color: "var(--paper-white)", lineHeight: 1.1 }}>
           The memories we've cherished.
         </h2>
       </div>

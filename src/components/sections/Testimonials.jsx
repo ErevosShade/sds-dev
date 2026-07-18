@@ -132,6 +132,13 @@ export default function Testimonials() {
               lineHeight: 1.55,
               margin: 0, marginBottom: 32,
               maxWidth: 700,
+              // Quotes range from ~150 to ~260 characters — without a floor here,
+              // the 5s auto-advance timer changes this section's height every
+              // cycle, which changes total document height, which triggers
+              // ScrollTrigger's automatic refreshAll for every pinned section
+              // on the page (Events/Gallery/Speakers) on a recurring 5s loop,
+              // completely independent of scroll position or the navbar.
+              minHeight: "clamp(120px, 14vw, 190px)",
             }}>
               {t.quote}
             </blockquote>

@@ -1,13 +1,21 @@
+import { useScrollContext } from "../../context/ScrollContext";
+import { useSmoothScroll } from "../../hooks/useSmoothScroll";
+
 /**
  * PageWrapper
- * Simple scroll container. Locomotive Scroll can be layered in
- * once all sections are stable — wiring it too early creates
- * ScrollTrigger proxy conflicts during development.
+ * Wires the single Lenis + GSAP ticker instance (see useSmoothScroll) once
+ * at the top of the tree, and shares the Lenis instance via ScrollContext
+ * so other components (e.g. Navbar's anchor links) can drive it too.
  */
-const PageWrapper = ({ children }) => (
-  <div id="scroll-container">
-    {children}
-  </div>
-);
+const PageWrapper = ({ children }) => {
+  const { lenisRef } = useScrollContext();
+  useSmoothScroll(lenisRef);
+
+  return (
+    <div id="scroll-container">
+      {children}
+    </div>
+  );
+};
 
 export default PageWrapper;

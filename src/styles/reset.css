@@ -24,6 +24,13 @@ body {
   overflow-x: hidden;
 }
 
+/* Headings inherit body weight by default — DM Serif Display only ships a
+   regular cut, and the browser's bold UA default was making headings that
+   forgot to set fontWeight inline render inconsistently bold. */
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 400;
+}
+
 /* Remove default list styles */
 ul, ol { list-style: none; }
 

@@ -84,6 +84,17 @@ export default function Events() {
       const state = { t: 0 };
       const DEG_PER_UNIT = SWEEP_DEG / total;
 
+      // Jerk/inertia — a tiny damped spring layered ON TOP of the precise
+      // scrub rotation, driven by how fast `state.t` is changing frame to
+      // frame. Fast scrolling kicks the ring past its exact position; it
+      // overshoots and settles back once scrolling slows/stops, like a real
+      // weighted dial rather than a value locked 1:1 to the scrollbar. The
+      // index-switching logic below still reads the exact `state.t` —
+      // only the ring's visual rotation gets the extra flourish.
+      let jerkOffset = 0, jerkVelocity = 0;
+      let lastT = 0, lastTime = performance.now();
+      const STIFFNESS = 90, DAMPING = 12;
+
       gsap.timeline({
         scrollTrigger: {
           trigger: section,
@@ -97,7 +108,19 @@ export default function Events() {
         ease: "none",
         duration: total,
         onUpdate: () => {
-          dial.setAttribute("transform", `rotate(${state.t * DEG_PER_UNIT} 150 150)`);
+          const now = performance.now();
+          const dt = Math.min(0.05, (now - lastTime) / 1000); // clamp so tab-switches don't spike it
+          lastTime = now;
+
+          const velocityDegPerSec = dt > 0 ? ((state.t - lastT) * DEG_PER_UNIT) / dt : 0;
+          lastT = state.t;
+
+          const target = gsap.utils.clamp(-25, 25, velocityDegPerSec * 0.03);
+          const force = (target - jerkOffset) * STIFFNESS - jerkVelocity * DAMPING;
+          jerkVelocity += force * dt;
+          jerkOffset += jerkVelocity * dt;
+
+          dial.setAttribute("transform", `rotate(${state.t * DEG_PER_UNIT + jerkOffset} 150 150)`);
           updateNames(state.t);
 
           const idx = Math.min(Math.floor(state.t), total - 1);
