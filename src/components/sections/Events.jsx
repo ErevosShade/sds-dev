@@ -38,13 +38,13 @@ export default function Events() {
     const total = EVENTS.length;
     const SWEEP_DEG = -360; // reversed — one full, clearly-visible glide the other way
 
-    // Positions the name wheel for a given scroll progress: the current name
-    // sits sharp, white, and centered; neighbors drift off, blur, and pick up
-    // a blue tint as they recede — like text riding the rim of the same dial
-    // that's rotating. Only translateX curves them (no rotate) so every name
-    // stays perfectly horizontal/readable even as it arcs away from center.
-    const updateNames = (progress) => {
-      const continuous = progress * total;
+    // Positions the name wheel for a given "continuous" value (0..total, NOT
+    // a 0..1 fraction) — the current name sits sharp, white, and centered;
+    // neighbors drift off, blur, and pick up a blue tint as they recede, like
+    // text riding the rim of the same dial that's rotating. Only translateX
+    // curves them (no rotate) so every name stays perfectly horizontal/
+    // readable even as it arcs away from center.
+    const updateNames = (continuous) => {
       nameRefs.current.forEach((el, i) => {
         if (!el) return;
         const delta = i - continuous;
@@ -63,39 +63,39 @@ export default function Events() {
     const ctx = gsap.context(() => {
       updateNames(0);
 
-      const tl = gsap.timeline({
+      // Single source of truth for timing: one tween, one state object,
+      // covering 0..total exactly like the old "continuous" value did. Ring
+      // rotation, the name wheel, AND the active card index are all derived
+      // from this SAME onUpdate call — so they can never drift apart, no
+      // matter how much scrub smoothing lag is applied. (Previously the card/
+      // names read ScrollTrigger's raw, unsmoothed self.progress while the
+      // ring read this tween's scrubbed progress — two clocks for one motion,
+      // which is why the ring visibly lagged behind the name/card.)
+      const state = { t: 0 };
+      const DEG_PER_UNIT = SWEEP_DEG / total;
+
+      gsap.timeline({
         scrollTrigger: {
           trigger: section,
           pin: true,
           scrub: 1, // smoothing lag — reads as a glide, not a mechanical snap
           start: "top top",
           end: `+=${total * 320}`,
-          onUpdate: (self) => {
-            const idx = Math.min(
-              Math.floor(self.progress * total),
-              total - 1
-            );
-            if (idx !== activeRef.current) {
-              activeRef.current = idx;
-              setActive(idx);
-            }
-
-            updateNames(self.progress);
-          },
         },
-      });
-
-      // Tween a plain object, not the CSS transform directly — then apply the
-      // rotation as a native SVG transform="rotate(deg 150 150)" attribute.
-      // CSS transform-origin/transform-box on SVG elements is ambiguous across
-      // browsers (that was the real cause of the tick ring drifting off the
-      // bezel's center); the SVG rotate() syntax's pivot is unambiguous.
-      const rotationState = { deg: 0 };
-      tl.to(rotationState, {
-        deg: SWEEP_DEG,
+      }).to(state, {
+        t: total,
         ease: "none",
         duration: total,
-        onUpdate: () => dial.setAttribute("transform", `rotate(${rotationState.deg} 150 150)`),
+        onUpdate: () => {
+          dial.setAttribute("transform", `rotate(${state.t * DEG_PER_UNIT} 150 150)`);
+          updateNames(state.t);
+
+          const idx = Math.min(Math.floor(state.t), total - 1);
+          if (idx !== activeRef.current) {
+            activeRef.current = idx;
+            setActive(idx);
+          }
+        },
       });
     }, section);
 
