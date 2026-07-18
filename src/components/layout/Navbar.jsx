@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
+import gsap from "gsap";
 import SDSLogo from "../ui/SDSLogo";
 
 const NAV_LINKS = [
@@ -24,23 +25,55 @@ export default function Navbar() {
   // Close mobile menu on route change
   useEffect(() => setMenuOpen(false), [location]);
 
+  // Immersed → floating morph. Signature moment: full GSAP, not CSS transition.
+  // Outer element only positions; the inner bar is what actually shrinks/rounds,
+  // since a fixed box with left:0/right:0 won't shrink via max-width + auto margins.
+  useEffect(() => {
+    const nav = navRef.current;
+    if (!nav) return;
+    gsap.to(nav, floating ? {
+      marginTop: 14,
+      width: "min(1080px, calc(100% - 48px))",
+      borderRadius: 14,
+      paddingLeft: 28,
+      paddingRight: 28,
+      backgroundColor: "rgba(19,22,31,0.68)",
+      borderColor: "rgba(238,233,220,0.08)",
+      boxShadow: "0 16px 48px -12px rgba(0,0,0,0.55)",
+      duration: 0.6,
+      ease: "power3.out",
+    } : {
+      marginTop: 0,
+      width: "100%",
+      borderRadius: 0,
+      paddingLeft: 40,
+      paddingRight: 40,
+      backgroundColor: "rgba(12,14,20,0)",
+      borderColor: "rgba(238,233,220,0)",
+      boxShadow: "0 0 0 rgba(0,0,0,0)",
+      duration: 0.5,
+      ease: "power2.inOut",
+    });
+  }, [floating]);
+
   return (
+    <div style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: "var(--z-nav)", display: "flex", justifyContent: "center" }}>
     <nav
       ref={navRef}
       style={{
-        position: "fixed",
-        top: 0, left: 0, right: 0,
-        zIndex: "var(--z-nav)",
+        width: "100%",
+        margin: "0 auto",
         padding: "0 40px",
         height: 64,
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
-        transition: "background 0.4s ease, border-color 0.4s ease, backdrop-filter 0.4s ease",
-        background: floating ? "rgba(12,14,20,0.88)" : "transparent",
-        backdropFilter: floating ? "blur(14px)" : "none",
-        WebkitBackdropFilter: floating ? "blur(14px)" : "none",
-        borderBottom: floating ? "1px solid rgba(255,255,255,0.06)" : "1px solid transparent",
+        borderWidth: 1,
+        borderStyle: "solid",
+        borderColor: "rgba(238,233,220,0)",
+        backdropFilter: floating ? "blur(18px) saturate(140%)" : "none",
+        WebkitBackdropFilter: floating ? "blur(18px) saturate(140%)" : "none",
+        transition: "backdrop-filter 0.5s ease",
       }}
     >
       {/* Logo */}
@@ -141,5 +174,6 @@ export default function Navbar() {
         }
       `}</style>
     </nav>
+    </div>
   );
 }

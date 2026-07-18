@@ -62,7 +62,7 @@ export default function Hero() {
           data[idx]     = v > 0 ? wr / v : 0;
           data[idx + 1] = v > 0 ? wg / v : 0;
           data[idx + 2] = v > 0 ? wb / v : 0;
-          data[idx + 3] = (v * 210) | 0;
+          data[idx + 3] = (v * 150) | 0;
           idx += 4;
         }
       }
@@ -94,7 +94,7 @@ export default function Hero() {
     const lerp = (a, b, t) => a + (b - a) * t;
 
     const apply = () => {
-      const v = `radial-gradient(circle ${Math.round(currentR)}px at ${Math.round(lx)}px ${Math.round(ly)}px, black 25%, transparent 100%)`;
+      const v = `radial-gradient(circle ${Math.round(currentR)}px at ${Math.round(lx)}px ${Math.round(ly)}px, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.32) 40%, transparent 100%)`;
       canvas.style.maskImage = v;
       canvas.style.webkitMaskImage = v;
     };
