@@ -8,7 +8,7 @@ export default function Sponsors() {
     <section
       id="sponsors"
       style={{
-        background: "var(--void)",
+        background: "transparent",
         padding: "clamp(48px, 6vw, 72px) clamp(24px, 6vw, 96px)",
         textAlign: "center",
       }}

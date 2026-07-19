@@ -16,7 +16,9 @@ html {
 }
 
 body {
-  background-color: var(--void);
+  /* Deep base behind the fixed PageBackground layer — prevents any flash and
+     matches the unified backdrop's darkest tone. */
+  background-color: #05070E;
   color: var(--paper-white);
   font-family: var(--font-body);
   font-size: var(--text-base);

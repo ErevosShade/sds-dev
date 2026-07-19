@@ -50,7 +50,7 @@ export default function Testimonials() {
     <section
       id="testimonials"
       style={{
-        background: "var(--void)",
+        background: "transparent",
         overflow: "hidden",
       }}
     >

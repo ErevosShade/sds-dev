@@ -71,7 +71,7 @@ export default function Gallery() {
       ref={sectionRef}
       id="gallery"
       style={{
-        background: "var(--void)",
+        background: "transparent",
         height: reduceMotion ? "auto" : "100vh",
         overflow: reduceMotion ? "visible" : "hidden",
         position: "relative",

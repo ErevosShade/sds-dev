@@ -2,6 +2,7 @@ import { useState } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ScrollProvider } from "./context/ScrollContext";
 import PageWrapper from "./components/layout/PageWrapper";
+import PageBackground from "./components/layout/PageBackground";
 import LoadingScreen from "./components/layout/LoadingScreen";
 import Navbar    from "./components/layout/Navbar";
 import Footer    from "./components/layout/Footer";
@@ -23,6 +24,7 @@ const App = () => {
   return (
     <BrowserRouter>
       <ScrollProvider>
+        <PageBackground />
         {!introDone && <LoadingScreen onComplete={handleIntroComplete} />}
         <Navbar />
         <PageWrapper>

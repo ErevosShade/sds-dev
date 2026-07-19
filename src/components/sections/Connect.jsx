@@ -30,7 +30,7 @@ export default function Connect() {
     <section
       id="connect"
       style={{
-        background: "var(--void)",
+        background: "transparent",
         padding: "clamp(80px, 10vw, 140px) clamp(24px, 6vw, 96px)",
       }}
     >

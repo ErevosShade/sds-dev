@@ -70,7 +70,7 @@ export default function Speakers() {
       ref={sectionRef}
       id="speakers"
       style={{
-        background: "var(--void)",
+        background: "transparent",
         minHeight: "100vh",
         display: "flex",
         flexDirection: "column",

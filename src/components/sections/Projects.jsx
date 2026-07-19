@@ -11,7 +11,7 @@ export default function Projects() {
     <section
       id="projects"
       style={{
-        background: "var(--void)",
+        background: "transparent",
         padding: "clamp(80px, 10vw, 140px) clamp(24px, 6vw, 96px)",
       }}
     >

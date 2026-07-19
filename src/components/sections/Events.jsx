@@ -174,7 +174,7 @@ export default function Events() {
       id="events"
       style={{
         position: "relative",
-        background: "var(--void)",
+        background: "transparent",
         minHeight: "100vh",
         display: "flex",
         alignItems: "center",
