@@ -22,13 +22,28 @@ export default function Events() {
   const nameRefs    = useRef([]);
   const [active, setActive]   = useState(0);
   const activeRef = useRef(0);
+  const cardRef   = useRef(null);
   const [reduceMotion, setReduceMotion] = useState(false);
 
-  const ROW_HEIGHT = 76;
+  // Top-line-to-top-line spacing between event names, ~3.5 name lines. Rows
+  // are anchored by their TOP line (not their center), so a title that wraps
+  // to 2-3 lines grows downward into this gap instead of overlapping its
+  // neighbors. ROW_TOP_OFFSET lifts the wheel so the active name's first line
+  // sits on the center axis (aligned with the dial + card).
+  const ROW_HEIGHT = 108;
+  const ROW_TOP_OFFSET = 20;
 
   useEffect(() => {
     setReduceMotion(window.matchMedia("(prefers-reduced-motion: reduce)").matches);
   }, []);
+
+  // Card's initial state: hidden (it fades in once when the section is reached
+  // — that trigger lives in the scroll effect below, alongside the pin so they
+  // share refresh timing). Under reduced motion it's simply shown.
+  useEffect(() => {
+    if (!cardRef.current) return;
+    gsap.set(cardRef.current, reduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 28 });
+  }, [reduceMotion]);
 
   // Scroll pins the section, drives which event is active, turns the big
   // background compass, and glides the vertical name wheel — one continuous
@@ -63,7 +78,7 @@ export default function Events() {
         const tx = -Math.min(dist * dist * 6, 70); // curves away/left as it recedes, like a rim
         const opacity = Math.max(0, 1 - dist * 0.7);
         const blur = Math.min(dist * 3.5, 8);
-        el.style.transform = `translateY(calc(-50% + ${ty}px)) translateX(${tx}px)`;
+        el.style.transform = `translateY(${ty - ROW_TOP_OFFSET}px) translateX(${tx}px)`;
         el.style.opacity = opacity;
         el.style.filter = `blur(${blur}px)`;
         el.style.color = nameColor(Math.min(dist, 1));
@@ -101,7 +116,7 @@ export default function Events() {
           pin: true,
           scrub: 1, // smoothing lag — reads as a glide, not a mechanical snap
           start: "top top",
-          end: `+=${total * 320}`,
+          end: `+=${total * 190}`, // shorter scroll per event — switches quicker
         },
       }).to(state, {
         t: total,
@@ -123,12 +138,28 @@ export default function Events() {
           dial.setAttribute("transform", `rotate(${state.t * DEG_PER_UNIT + jerkOffset} 150 150)`);
           updateNames(state.t);
 
-          const idx = Math.min(Math.floor(state.t), total - 1);
+          // Round (not floor): the card flips to the next event once the wheel
+          // has travelled MORE THAN HALF the way toward it — i.e. as soon as
+          // that name becomes the one closest to center — rather than waiting
+          // for it to fully arrive. Matches the reference's mid-travel switch.
+          const idx = Math.min(Math.max(Math.round(state.t), 0), total - 1);
           if (idx !== activeRef.current) {
             activeRef.current = idx;
             setActive(idx);
           }
         },
+      });
+
+      // Card loads in ONCE, when the section is ~1/3 into the viewport — the
+      // first event name is settling into display at this point. Created inside
+      // the same context as the pin trigger so it shares the pin's refresh
+      // timing (a standalone ScrollTrigger computed its start before the
+      // pin-spacer existed, so it fired at the wrong scroll position).
+      ScrollTrigger.create({
+        trigger: section,
+        start: "top 30%",
+        once: true,
+        onEnter: () => gsap.to(cardRef.current, { opacity: 1, y: 0, duration: 0.7, ease: "power3.out" }),
       });
     }, section);
 
@@ -183,47 +214,72 @@ export default function Events() {
           viewBox="-20 -20 340 340"
           style={{ width: "100%", height: "100%" }}
         >
-          {/* Outer bezel — minimal: one crisp ring, one faint inner ring */}
-          <circle cx="150" cy="150" r="142" fill="none" stroke={`${BLUE}60`} strokeWidth="1.5" />
-          <circle cx="150" cy="150" r="120" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="0.5" />
+          <defs>
+            {/* soft glow filling the dial body — the fluid base */}
+            <radialGradient id="sds-fluid" gradientUnits="userSpaceOnUse" cx="150" cy="150" r="150">
+              <stop offset="0%"   stopColor={BLUE} stopOpacity="0.10" />
+              <stop offset="55%"  stopColor={BLUE} stopOpacity="0.03" />
+              <stop offset="100%" stopColor={BLUE} stopOpacity="0" />
+            </radialGradient>
+            {/* blue fluid halo that wraps AROUND the OUTSIDE of the tick ring —
+                pure glow, no stroke. Peaks just past the outer circle then
+                fades outward, so the radial ticks read as an inner layer with
+                the glow as the outer halo. */}
+            <radialGradient id="sds-ring-glow" gradientUnits="userSpaceOnUse" cx="150" cy="150" r="154">
+              <stop offset="0"    stopColor={BLUE} stopOpacity="0" />
+              <stop offset="0.80" stopColor={BLUE} stopOpacity="0" />
+              <stop offset="0.88" stopColor={BLUE} stopOpacity="0.2" />
+              <stop offset="1"    stopColor={BLUE} stopOpacity="0" />
+            </radialGradient>
+          </defs>
 
-          {/* Dial — ticks, event markers. Rotated via a native SVG transform attribute
-              (rotate(deg 150 150)) set imperatively — see the effect above. */}
+          {/* ── STATIC frame ─────────────────────────────────────────────────
+              Soft fluid glow body; a blue glow band just inside the outer edge
+              (no border); one slight circle line at the OUTER edge of the
+              ticks; and the center hub. */}
+          <circle cx="150" cy="150" r="150" fill="url(#sds-fluid)" />
+          <circle cx="150" cy="150" r="154" fill="url(#sds-ring-glow)" />
+          <circle cx="150" cy="150" r="133" fill="none" stroke="rgba(255,255,255,0.07)" strokeWidth="0.5" />
+
+          {/* ── ROTATING dial — fine graduated bezel + event markers ──────────
+              120 ticks (every 3°), three tiers. Each tick is its own
+              <g rotate(deg 150 150)> wrapping a line drawn straight up from
+              center — the clock-hand technique (rotate around the shared pivot,
+              not hand-computed sin/cos), so every tick stays provably
+              concentric regardless of browser transform quirks. */}
           <g ref={dialRef}>
-
-            {/* Minimal graduated ticks — every 15 degrees, two tiers only.
-                Each tick is its own <g rotate(deg 150 150)> wrapping a vertical
-                line drawn straight up from center — the exact clock-hand
-                technique (rotate around the shared pivot, not hand-computed
-                sin/cos coordinates), so every tick is provably concentric
-                with the bezel regardless of browser transform quirks. */}
-            {Array.from({ length: 24 }, (_, i) => {
-              const deg = i * 15;
-              const isMajor = deg % 90 === 0;
+            {/* Dense fine graduation — 180 ticks (every 2°), three tiers. The
+                fine minor ticks are short + faint so the rim reads as a dense,
+                precise scale. */}
+            {Array.from({ length: 180 }, (_, i) => {
+              const deg = i * 2;
+              const major  = deg % 30 === 0;
+              const medium = !major && deg % 10 === 0;
               const r1 = 132;
-              const r2 = isMajor ? 112 : 122;
+              const r2 = major ? 116 : medium ? 123 : 128;
+              const stroke = major
+                ? `${BLUE}4d`
+                : medium
+                ? "rgba(255,255,255,0.12)"
+                : "rgba(255,255,255,0.07)";
+              const width = major ? 1.0 : medium ? 0.6 : 0.4;
               return (
                 <g key={i} transform={`rotate(${deg} 150 150)`}>
-                  <line
-                    x1="150" y1={150 - r1}
-                    x2="150" y2={150 - r2}
-                    stroke={isMajor ? `${BLUE}55` : "rgba(255,255,255,0.14)"}
-                    strokeWidth={isMajor ? 1.5 : 0.75}
-                  />
+                  <line x1="150" y1={150 - r1} x2="150" y2={150 - r2} stroke={stroke} strokeWidth={width} />
                 </g>
               );
             })}
 
-            {/* Event dots — evenly spaced around the full ring, same rotate-around-pivot technique */}
+            {/* Event dots — on the rim */}
             {EVENTS.map((ev, i) => {
               const deg = (i / EVENTS.length) * 360;
               const isActive = i === active;
               return (
                 <g key={i} transform={`rotate(${deg} 150 150)`}>
                   <circle
-                    cx="150" cy={150 - 140}
-                    r={isActive ? 5 : 3}
-                    fill={isActive ? BLUE : "rgba(255,255,255,0.15)"}
+                    cx="150" cy={150 - 128}
+                    r={isActive ? 4 : 2.2}
+                    fill={isActive ? BLUE : "rgba(255,255,255,0.18)"}
                     style={{ transition: "all 0.4s var(--ease-out)", filter: isActive ? `drop-shadow(0 0 6px ${BLUE})` : "none" }}
                   />
                 </g>
@@ -269,106 +325,157 @@ export default function Events() {
           ) : (
             /* Event name wheel — sits in the gap between the dial and the card, nudged right.
                 Glides continuously with scroll; the current name is sharp, neighbors drift
-                off-center and blur out, like a picker on a physical dial. */
-            <div style={{ position: "absolute", top: "50%", left: 0, right: 0, transform: "translateY(-50%) translateX(104px)", height: 260, overflow: "hidden" }}>
+                off-center and blur out, like a picker on a physical dial. Each name carries
+                its two-digit index in front of it (color/opacity/blur all inherited from the
+                row, so the number glides with exactly the same effect). Left-aligned so a
+                long title's extra length spills out to the right, leaving the left edge — the
+                number + name start — perfectly steady as the wheel turns. */
+            <div style={{ position: "absolute", top: "50%", left: 0, right: 0, transform: "translateY(-50%) translateX(clamp(140px, 22vw, 400px))", height: 260, overflow: "visible" }}>
               {EVENTS.map((ev, i) => (
-                <h3
+                <div
                   key={i}
                   ref={(el) => (nameRefs.current[i] = el)}
                   style={{
-                    position: "absolute", top: "50%", right: 0,
-                    width: "min(52%, 280px)",
-                    textAlign: "right",
-                    fontFamily: "var(--font-display)",
-                    fontSize: "clamp(22px, 2.4vw, 32px)",
-                    fontWeight: 400,
+                    position: "absolute", top: "50%", left: 0,
+                    // the index sits just outside the dial's rim, the name a
+                    // clear step further into the gap (reference's
+                    // "09 ...... WOMEN PANEL" spacing).
+                    display: "flex", alignItems: "flex-start", gap: "clamp(40px, 5.5vw, 100px)",
                     color: "var(--paper-white)",
-                    lineHeight: 1.2,
-                    margin: 0,
-                    overflowWrap: "break-word",
                     willChange: "transform, filter, opacity",
                   }}
-                >{ev.title}</h3>
+                >
+                  <span style={{
+                    fontFamily: "var(--font-mono)",
+                    fontSize: "clamp(13px, 1.2vw, 17px)",
+                    letterSpacing: "0.06em",
+                    color: "inherit", opacity: 0.5,
+                    flexShrink: 0,
+                    marginTop: "0.35em", // nudge the small index onto the title's first line
+                  }}>{String(i + 1).padStart(2, "0")}</span>
+                  <h3 style={{
+                    // spaced uppercase sans, matching the reference's dial type
+                    // (not the site's serif display) — clean, technical, wide.
+                    fontFamily: "var(--font-body)",
+                    fontSize: "clamp(20px, 2.2vw, 30px)",
+                    fontWeight: 500,
+                    letterSpacing: "0.08em",
+                    textTransform: "uppercase",
+                    color: "inherit",
+                    lineHeight: 1.25, margin: 0,
+                    // long titles wrap to two lines rather than overrunning —
+                    // left edge stays fixed, extra length stacks downward.
+                    maxWidth: "clamp(200px, 22vw, 340px)",
+                    overflowWrap: "break-word",
+                  }}>{ev.title}</h3>
+                </div>
               ))}
             </div>
           )}
         </div>
 
-        {/* RIGHT — Event detail card. The shell mounts once (no key={active} here) —
-            only its content swaps as the active event changes, so it never
-            "reloads"; border/accent colors just transition smoothly in place. */}
-        <div style={{ alignSelf: "center", justifySelf: "end", width: "100%", maxWidth: 400 }}>
-          <div style={{
-            background: "var(--surface)",
-            border: `1px solid ${BLUE}28`,
-            borderRadius: "var(--radius-lg)",
-            padding: "clamp(28px, 3vw, 48px)",
-            minHeight: 480,
-            display: "flex",
-            flexDirection: "column",
+        {/* RIGHT — Event detail card, redesigned to the reference: a tall
+            rounded card, a visual band up top, then a bold uppercase title +
+            description at the bottom. The shell mounts once; cardRef gets a
+            fade+rise "load up" each time the active event changes (see effect
+            above). Visual band is an honest gradient + data-dot motif — the
+            events have no photos, so nothing fake/photographic is invented. */}
+        <div style={{ alignSelf: "center", justifySelf: "end", width: "100%", maxWidth: 420 }}>
+          <div ref={cardRef} style={{
             position: "relative",
+            minHeight: 520,
+            display: "flex", flexDirection: "column",
+            borderRadius: 24,
             overflow: "hidden",
+            border: `1px solid ${BLUE}2e`,
+            boxShadow: `0 28px 64px -28px ${BLUE}33`,
           }}>
-            {/* Top accent line */}
+            {/* Visual band */}
             <div style={{
-              position: "absolute", top: 0, left: 0, right: 0, height: 1,
-              background: `linear-gradient(90deg, transparent, ${BLUE}80, transparent)`,
-            }} />
+              position: "relative", flex: 1, minHeight: 240,
+              background: `linear-gradient(158deg, ${BLUE}2b 0%, var(--surface-raised) 46%, var(--surface) 100%)`,
+            }}>
+              {/* data-dot grid motif */}
+              <div style={{
+                position: "absolute", inset: 0, opacity: 0.6,
+                backgroundImage: "radial-gradient(rgba(255,255,255,0.06) 1px, transparent 1px)",
+                backgroundSize: "18px 18px",
+                maskImage: "radial-gradient(ellipse 80% 80% at 60% 40%, black, transparent 85%)",
+                WebkitMaskImage: "radial-gradient(ellipse 80% 80% at 60% 40%, black, transparent 85%)",
+              }} />
+              {/* corner glow */}
+              <div style={{
+                position: "absolute", top: -40, right: -40, width: 200, height: 200,
+                background: `radial-gradient(circle, ${BLUE}30, transparent 70%)`,
+                pointerEvents: "none",
+              }} />
 
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 24 }}>
-              <span style={{
-                fontFamily: "var(--font-mono)", fontSize: "var(--text-xs)",
-                letterSpacing: "0.1em", textTransform: "uppercase",
-                color: BLUE,
-                background: `${BLUE}15`,
-                border: `1px solid ${BLUE}28`,
-                padding: "4px 10px", borderRadius: "var(--radius-sm)",
-              }}>{event?.tag}</span>
+              {/* tag + status */}
+              <div style={{ position: "absolute", top: 20, left: 20, right: 20, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <span style={{
+                  fontFamily: "var(--font-mono)", fontSize: "var(--text-xs)",
+                  letterSpacing: "0.12em", textTransform: "uppercase",
+                  color: BLUE, background: `${BLUE}18`,
+                  border: `1px solid ${BLUE}30`,
+                  padding: "5px 12px", borderRadius: "var(--radius-sm)",
+                }}>{event?.tag}</span>
 
+                <span style={{
+                  display: "flex", alignItems: "center", gap: 6,
+                  fontFamily: "var(--font-mono)", fontSize: "var(--text-xs)",
+                  color: event?.status === "upcoming" ? BLUE : "var(--text-muted)",
+                  background: event?.status === "upcoming" ? `${BLUE}1a` : "rgba(255,255,255,0.05)",
+                  border: event?.status === "upcoming" ? `1px solid ${BLUE}40` : "1px solid rgba(255,255,255,0.08)",
+                  padding: "5px 12px", borderRadius: "999px",
+                }}>
+                  {event?.status === "upcoming" && (
+                    <span className="animate-pulse-blue" style={{ width: 6, height: 6, borderRadius: "50%", background: BLUE, display: "inline-block" }} />
+                  )}
+                  {event?.status === "upcoming" ? "Upcoming" : "Completed"}
+                </span>
+              </div>
+
+              {/* faint big index watermark */}
               <span style={{
-                display: "flex", alignItems: "center", gap: 6,
-                fontFamily: "var(--font-mono)", fontSize: "var(--text-xs)",
-                color: event?.status === "upcoming" ? BLUE : "var(--text-muted)",
-                background: event?.status === "upcoming" ? `${BLUE}1a` : "rgba(255,255,255,0.05)",
-                border: event?.status === "upcoming" ? `1px solid ${BLUE}40` : "1px solid rgba(255,255,255,0.08)",
-                padding: "4px 12px", borderRadius: "999px",
-              }}>
-                {event?.status === "upcoming" && (
-                  <span className="animate-pulse-blue" style={{ width: 6, height: 6, borderRadius: "50%", background: BLUE, display: "inline-block" }} />
-                )}
-                {event?.status === "upcoming" ? "Upcoming" : "Completed"}
-              </span>
+                position: "absolute", bottom: 12, left: 24,
+                fontFamily: "var(--font-mono)", fontSize: 72, lineHeight: 1,
+                color: "rgba(255,255,255,0.04)", letterSpacing: "-0.03em",
+              }}>{String(active + 1).padStart(2, "0")}</span>
             </div>
 
-            <h3 style={{
-              fontFamily: "var(--font-display)",
-              fontSize: "clamp(24px, 3vw, 36px)",
-              fontWeight: 400,
-              color: "var(--paper-white)",
-              lineHeight: 1.15,
-              marginBottom: 16,
-            }}>{event?.title}</h3>
+            {/* Content footer — bold uppercase title + description + meta */}
+            <div style={{
+              padding: "clamp(24px, 3vw, 36px)",
+              background: "linear-gradient(to top, var(--void), var(--surface))",
+              borderTop: `1px solid ${BLUE}1f`,
+            }}>
+              <h3 style={{
+                fontFamily: "var(--font-body)",
+                fontWeight: 700,
+                textTransform: "uppercase",
+                letterSpacing: "0.03em",
+                fontSize: "clamp(24px, 3vw, 34px)",
+                color: "var(--paper-white)",
+                lineHeight: 1.1,
+                margin: 0, marginBottom: 14,
+              }}>{event?.title}</h3>
 
-            <p style={{
-              fontFamily: "var(--font-body)",
-              fontSize: "var(--text-sm)",
-              color: "rgba(238,233,220,0.45)",
-              lineHeight: 1.75,
-              marginBottom: 32,
-            }}>{event?.description}</p>
+              <p style={{
+                fontFamily: "var(--font-body)",
+                fontSize: "var(--text-sm)",
+                color: "rgba(238,233,220,0.5)",
+                lineHeight: 1.65,
+                margin: 0, marginBottom: 22,
+              }}>{event?.description}</p>
 
-            <div style={{ display: "flex", flexDirection: "column", gap: 8, borderTop: "1px solid rgba(255,255,255,0.06)", paddingTop: 24, marginTop: "auto" }}>
-              <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-                <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.08em", textTransform: "uppercase", minWidth: 48 }}>Date</span>
-                <span style={{ fontFamily: "var(--font-body)", fontSize: "var(--text-sm)", color: "rgba(238,233,220,0.55)" }}>{event?.date}</span>
-              </div>
-              <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-                <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.08em", textTransform: "uppercase", minWidth: 48 }}>Venue</span>
-                <span style={{ fontFamily: "var(--font-body)", fontSize: "var(--text-sm)", color: "rgba(238,233,220,0.55)" }}>{event?.venue}</span>
-              </div>
-              <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-                <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.08em", textTransform: "uppercase", minWidth: 48 }}>Coord</span>
-                <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-sm)", color: BLUE }}>{event?.coordinate}</span>
+              <div style={{
+                display: "flex", alignItems: "center", gap: 14, flexWrap: "wrap",
+                fontFamily: "var(--font-mono)", fontSize: "var(--text-xs)",
+                color: "var(--text-muted)", letterSpacing: "0.04em",
+              }}>
+                <span>{event?.date}</span>
+                <span style={{ opacity: 0.4 }}>·</span>
+                <span>{event?.venue}</span>
               </div>
             </div>
           </div>
