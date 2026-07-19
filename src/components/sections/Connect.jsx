@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useTextReveal } from "../../hooks/useTextReveal";
+import { useWriteReveal } from "../../hooks/useWriteReveal";
 
 const SOCIALS = [
   { label: "Instagram", url: "#", bg: "#F2789F", glyph: "IG" },
@@ -10,14 +10,17 @@ const SOCIALS = [
 // One deliberate loud moment, scoped to this section only — everywhere else
 // on the site stays on the restrained void/data-blue/amber palette. These
 // are NOT design tokens; they exist only in Connect.
-const LOUD_YELLOW = "#F4C430";
-const LOUD_RED    = "#E8433D";
-const LOUD_PINK   = "#F2789F";
-const LOUD_BLUE   = "#4FA3E8";
-const INK         = "#0C0E14"; // same hex as --void, used here as "ink on paper" rather than page background
+const YELLOW = "#F4C430"; // contrast accent kept for the email chip
+
+// Terminal palette — LIGHT "Claude CLI" theme: warm cream panel with Claude's
+// coral-red accent. A light card on the dark page = high contrast, and it pops.
+const T_BG = "#FAF8F3", T_BAR = "#F0EDE3", T_BORDER = "rgba(20,18,14,0.12)";
+const T_PROMPT = "#D9785A", T_CMD = "#26241E", T_LABEL = "rgba(38,36,30,0.5)";
+const T_COMMENT = "#918A76", T_CARET = "#C9603E", T_OK = "#3F7D4E", T_DIM = "rgba(38,36,30,0.42)";
+const T_BTN_TEXT = "#FBF7F1"; // cream text on the coral submit button
 
 export default function Connect() {
-  const headRef = useTextReveal();
+  const headRef = useWriteReveal();
   const [submitted, setSubmitted] = useState(false);
   const [form, setForm] = useState({ name: "", email: "", branch: "", message: "" });
 
@@ -34,7 +37,7 @@ export default function Connect() {
         padding: "clamp(80px, 10vw, 140px) clamp(24px, 6vw, 96px)",
       }}
     >
-      <p style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-xs)", letterSpacing: "0.18em", textTransform: "uppercase", color: LOUD_RED, fontWeight: 500, marginBottom: 16 }}>
+      <p style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-xs)", letterSpacing: "0.18em", textTransform: "uppercase", color: T_PROMPT, fontWeight: 500, marginBottom: 16 }}>
         Connect
       </p>
 
@@ -50,186 +53,146 @@ export default function Connect() {
             Join 120+ students building real projects, attending workshops, and getting placed. Applications open every semester.
           </p>
 
-          {/* Email — flat yellow sticker, black ink, folded corner */}
+          {/* Email — terminal-style command chip, matching the /join window */}
+          <div style={{ fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: "0.2em", textTransform: "uppercase", color: "rgba(238,233,220,0.4)", marginBottom: 12 }}>// reach us</div>
           <a
             href="mailto:sds@bitmesra.ac.in"
             style={{
-              position: "relative",
-              display: "block",
-              background: LOUD_YELLOW,
-              border: `2px solid ${INK}`,
-              borderRadius: "var(--radius-sm)",
-              padding: "16px 24px",
+              display: "inline-flex", alignItems: "center", gap: 12, flexWrap: "wrap",
+              fontFamily: "var(--font-mono)", fontSize: "clamp(13px, 1.3vw, 15px)",
               textDecoration: "none",
-              overflow: "hidden",
-              transform: "rotate(-0.6deg)",
-              transition: "transform 0.2s var(--ease-out)",
+              padding: "14px 20px", borderRadius: 10,
+              background: "rgba(244,196,48,0.06)",
+              border: `1px solid ${YELLOW}66`,
+              transition: "border-color 0.2s var(--ease-out), background 0.2s var(--ease-out)",
             }}
-            onMouseEnter={e => e.currentTarget.style.transform = "rotate(0deg)"}
-            onMouseLeave={e => e.currentTarget.style.transform = "rotate(-0.6deg)"}
+            onMouseEnter={e => { e.currentTarget.style.borderColor = YELLOW; e.currentTarget.style.background = "rgba(244,196,48,0.14)"; }}
+            onMouseLeave={e => { e.currentTarget.style.borderColor = `${YELLOW}66`; e.currentTarget.style.background = "rgba(244,196,48,0.06)"; }}
           >
-            <span style={{ position: "absolute", top: -14, right: -14, width: 28, height: 28, background: INK, transform: "rotate(45deg)" }} />
-            <span style={{ display: "block", fontFamily: "var(--font-mono)", fontSize: "var(--text-xs)", color: INK, letterSpacing: "0.08em", textTransform: "uppercase", fontWeight: 500, marginBottom: 6, opacity: 0.7 }}>
-              Email
-            </span>
-            <span style={{ display: "block", fontFamily: "var(--font-body)", fontSize: "var(--text-base)", color: INK, fontWeight: 500 }}>
-              sds@bitmesra.ac.in
-            </span>
+            <span style={{ color: YELLOW }}>$</span>
+            <span style={{ color: "rgba(238,233,220,0.5)" }}>mail</span>
+            <span style={{ color: "var(--paper-white)" }}>sds@bitmesra.ac.in</span>
+            <span style={{ color: YELLOW, marginLeft: 2 }}>↗</span>
           </a>
 
-          {/* Socials — colorful rotated stamp squares, not a plain list */}
-          <div style={{ display: "flex", gap: 16, marginTop: 24 }}>
-            {SOCIALS.map(({ label, url, bg, glyph }, i) => (
+          {/* Socials — mono command chips */}
+          <div style={{ display: "flex", gap: 10, marginTop: 18 }}>
+            {SOCIALS.map(({ label, url, glyph }) => (
               <a
                 key={label}
                 href={url}
                 aria-label={label}
                 style={{
-                  width: 56, height: 56,
                   display: "flex", alignItems: "center", justifyContent: "center",
-                  background: bg,
-                  border: `2px solid ${INK}`,
-                  borderRadius: "var(--radius-sm)",
-                  transform: `rotate(${i % 2 === 0 ? -6 : 6}deg)`,
-                  transition: "transform 0.2s var(--ease-out)",
-                  textDecoration: "none",
+                  minWidth: 54, height: 42, padding: "0 14px",
+                  fontFamily: "var(--font-mono)", fontSize: 13, letterSpacing: "0.04em",
+                  color: "rgba(238,233,220,0.7)", textDecoration: "none",
+                  background: "rgba(255,255,255,0.03)",
+                  border: "1px solid rgba(255,255,255,0.12)",
+                  borderRadius: 8,
+                  transition: "border-color 0.2s var(--ease-out), color 0.2s var(--ease-out), background 0.2s var(--ease-out)",
                 }}
-                onMouseEnter={e => e.currentTarget.style.transform = "rotate(0deg) scale(1.06)"}
-                onMouseLeave={e => e.currentTarget.style.transform = `rotate(${i % 2 === 0 ? -6 : 6}deg)`}
+                onMouseEnter={e => { e.currentTarget.style.borderColor = T_PROMPT; e.currentTarget.style.color = T_PROMPT; e.currentTarget.style.background = "rgba(217,120,90,0.08)"; }}
+                onMouseLeave={e => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.12)"; e.currentTarget.style.color = "rgba(238,233,220,0.7)"; e.currentTarget.style.background = "rgba(255,255,255,0.03)"; }}
               >
-                <span style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-sm)", fontWeight: 500, color: INK }}>{glyph}</span>
+                {glyph.toLowerCase()}
               </a>
             ))}
           </div>
         </div>
 
-        {/* Right — form, styled as a paper card dropped onto the dark page */}
+        {/* Right — membership form, reskinned as a terminal ("run to join") */}
         <div style={{ position: "relative" }}>
-          {/* Corner tabs peeking above the card */}
-          <div style={{ position: "absolute", top: -14, left: 32, right: 32, display: "flex", justifyContent: "space-between", pointerEvents: "none" }}>
-            <span style={{ width: 48, height: 20, background: LOUD_PINK, border: `2px solid ${INK}`, borderBottom: "none", borderRadius: "4px 4px 0 0", transform: "rotate(-3deg)" }} />
-            <span style={{ width: 48, height: 20, background: LOUD_YELLOW, border: `2px solid ${INK}`, borderBottom: "none", borderRadius: "4px 4px 0 0" }} />
-            <span style={{ width: 48, height: 20, background: LOUD_BLUE, border: `2px solid ${INK}`, borderBottom: "none", borderRadius: "4px 4px 0 0", transform: "rotate(3deg)" }} />
-          </div>
-
           <div style={{
-            position: "relative",
-            background: "var(--paper-white)",
-            border: `3px solid ${INK}`,
-            borderRadius: "var(--radius-md)",
-            boxShadow: `8px 8px 0 rgba(12,14,20,0.9)`,
-            padding: "clamp(28px, 3.5vw, 44px)",
-            transform: "rotate(0.4deg)",
+            background: T_BG,
+            border: `1px solid ${T_BORDER}`,
+            borderRadius: 10,
+            overflow: "hidden",
+            fontFamily: "var(--font-mono)",
+            boxShadow: "0 26px 64px -26px rgba(0,0,0,0.6), 0 0 46px -20px rgba(217,120,90,0.4)",
           }}>
-            {submitted ? (
-              <div style={{ textAlign: "center", padding: "24px 0" }}>
-                <div style={{ fontFamily: "var(--font-display)", fontSize: "var(--text-3xl)", color: INK, marginBottom: 12 }}>
-                  We got it.
-                </div>
-                <p style={{ fontFamily: "var(--font-body)", fontSize: "var(--text-sm)", color: "rgba(12,14,20,0.55)" }}>
-                  Someone from SDS will reach out to you soon.
-                </p>
-              </div>
-            ) : (
-              <>
-                <h3 style={{ fontFamily: "var(--font-mono)", fontSize: "var(--text-lg)", fontWeight: 500, letterSpacing: "0.04em", textTransform: "uppercase", color: INK, marginBottom: 8 }}>
-                  Membership Inquiry
-                </h3>
-                <div style={{ height: 2, background: INK, marginBottom: 28 }} />
+            {/* title bar */}
+            <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "11px 14px", background: T_BAR, borderBottom: `1px solid ${T_BORDER}` }}>
+              <span style={{ width: 11, height: 11, borderRadius: "50%", background: "#FF5F56" }} />
+              <span style={{ width: 11, height: 11, borderRadius: "50%", background: "#FFBD2E" }} />
+              <span style={{ width: 11, height: 11, borderRadius: "50%", background: "#27C93F" }} />
+              <span style={{ marginLeft: 10, fontSize: 11, letterSpacing: "0.06em", color: T_LABEL }}>sds@bitmesra: ~/join</span>
+            </div>
 
-                <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+            {/* body — Claude Code style: ✻ welcome box, bordered input fields, /command */}
+            <div style={{ padding: "clamp(20px, 2.6vw, 30px)", fontSize: 13.5, lineHeight: 1.7 }}>
+              {submitted ? (
+                <div>
+                  <div style={{ fontSize: 14, marginBottom: 12 }}><span style={{ color: T_PROMPT }}>✻</span> <span style={{ color: T_CMD, fontWeight: 600 }}>Running /join…</span></div>
+                  <div style={{ border: `1px solid ${T_BORDER}`, borderRadius: 10, padding: "14px 16px", background: "rgba(255,255,255,0.5)" }}>
+                    <div style={{ color: T_OK, fontWeight: 500 }}>✓ membership request queued</div>
+                    <div style={{ color: T_LABEL, marginTop: 4 }}>→ we&apos;ll reach out at {form.email || "your inbox"}</div>
+                  </div>
+                  <div style={{ fontSize: 11, color: T_LABEL, marginTop: 12 }}>? we usually reply within 2 days</div>
+                </div>
+              ) : (
+                <form onSubmit={handleSubmit}>
+                  {/* welcome panel */}
+                  <div style={{ border: `1px solid ${T_BORDER}`, borderRadius: 10, padding: "13px 16px", marginBottom: 16, background: "rgba(255,255,255,0.5)" }}>
+                    <div style={{ fontSize: 14 }}><span style={{ color: T_PROMPT }}>✻</span> <span style={{ color: T_CMD, fontWeight: 600 }}>Welcome to SDS Code</span></div>
+                    <div style={{ marginTop: 6, fontSize: 12.5, color: T_LABEL }}>membership signup · run <span style={{ color: T_PROMPT }}>/join</span> to apply</div>
+                  </div>
+
+                  <div style={{ fontSize: 12.5, color: T_COMMENT, marginBottom: 14 }}># fill the fields, then run</div>
+
                   {[
-                    { field: "name",    label: "Name",    placeholder: "Your full name",       type: "text" },
-                    { field: "email",   label: "Email",   placeholder: "you@bitmesra.ac.in",   type: "email" },
-                    { field: "branch",  label: "Branch",  placeholder: "CSE / ECE / MCA / ...", type: "text" },
+                    { field: "name",   label: "name",   placeholder: "your full name" },
+                    { field: "email",  label: "email",  placeholder: "you@bitmesra.ac.in", type: "email" },
+                    { field: "branch", label: "branch", placeholder: "CSE / ECE / MCA" },
                   ].map(({ field, label, placeholder, type }) => (
-                    <div key={field} style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                      <label style={{ fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "rgba(12,14,20,0.5)" }}>
-                        {label}
-                      </label>
+                    <label key={field} className="t-field">
+                      <span style={{ color: T_PROMPT, width: 52, flexShrink: 0, fontWeight: 500 }}>{label}</span>
+                      <span style={{ color: T_DIM }}>›</span>
                       <input
-                        type={type}
+                        type={type || "text"}
                         value={form[field]}
                         onChange={e => setForm(f => ({ ...f, [field]: e.target.value }))}
                         placeholder={placeholder}
                         required={field !== "branch"}
-                        style={{
-                          fontFamily: "var(--font-display)", fontStyle: "italic", fontSize: "var(--text-base)",
-                          color: INK,
-                          background: "transparent",
-                          border: "none",
-                          borderBottom: `1.5px solid rgba(12,14,20,0.25)`,
-                          borderRadius: 0,
-                          padding: "6px 2px",
-                          outline: "none",
-                          transition: "border-color 0.2s var(--ease-out)",
-                        }}
-                        onFocus={e => e.target.style.borderColor = INK}
-                        onBlur={e => e.target.style.borderColor = "rgba(12,14,20,0.25)"}
+                        className="t-input"
+                        style={{ flex: 1, minWidth: 0, fontFamily: "inherit", fontSize: "inherit", color: T_CMD, background: "transparent", border: "none", outline: "none", caretColor: T_CARET, padding: 0 }}
                       />
-                    </div>
+                    </label>
                   ))}
 
-                  <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                    <label style={{ fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "rgba(12,14,20,0.5)" }}>
-                      Message (optional)
-                    </label>
+                  <label className="t-field t-field--msg">
+                    <span style={{ color: T_PROMPT, width: 52, flexShrink: 0, fontWeight: 500 }}>msg</span>
+                    <span style={{ color: T_DIM }}>›</span>
                     <textarea
                       value={form.message}
                       onChange={e => setForm(f => ({ ...f, message: e.target.value }))}
-                      placeholder="What are you interested in working on?"
-                      rows={3}
-                      style={{
-                        fontFamily: "var(--font-display)", fontStyle: "italic", fontSize: "var(--text-base)",
-                        color: INK,
-                        background: "transparent",
-                        border: "none",
-                        borderBottom: `1.5px solid rgba(12,14,20,0.25)`,
-                        borderRadius: 0,
-                        padding: "6px 2px",
-                        outline: "none", resize: "vertical",
-                        transition: "border-color 0.2s var(--ease-out)",
-                      }}
-                      onFocus={e => e.target.style.borderColor = INK}
-                      onBlur={e => e.target.style.borderColor = "rgba(12,14,20,0.25)"}
+                      placeholder="what do you want to build?"
+                      rows={2}
+                      className="t-input"
+                      style={{ flex: 1, minWidth: 0, fontFamily: "inherit", fontSize: "inherit", color: T_CMD, background: "transparent", border: "none", outline: "none", caretColor: T_CARET, padding: 0, resize: "vertical", lineHeight: 1.6 }}
                     />
-                  </div>
+                  </label>
 
-                  <button
-                    type="submit"
-                    className="btn-press"
-                    style={{
-                      fontFamily: "var(--font-body)", fontSize: "var(--text-sm)",
-                      fontWeight: 500,
-                      letterSpacing: "0.06em",
-                      textTransform: "uppercase",
-                      color: "var(--paper-white)",
-                      background: INK,
-                      border: `2px solid ${INK}`,
-                      borderRadius: "var(--radius-sm)",
-                      padding: "14px 28px",
-                      cursor: "pointer",
-                      marginTop: 8,
-                      display: "flex", alignItems: "center", justifyContent: "center", gap: 10,
-                      transition: "opacity 0.2s var(--ease-out)",
-                    }}
-                    onMouseEnter={e => e.currentTarget.style.opacity = "0.8"}
-                    onMouseLeave={e => e.currentTarget.style.opacity = "1"}
-                  >
-                    Send Message ➤
-                  </button>
+                  <div style={{ display: "flex", alignItems: "center", gap: 14, marginTop: 14, flexWrap: "wrap" }}>
+                    <button
+                      type="submit"
+                      className="btn-press"
+                      style={{ fontFamily: "inherit", fontSize: 13, letterSpacing: "0.03em", color: T_BTN_TEXT, background: T_PROMPT, border: `1px solid ${T_CARET}`, borderRadius: 7, padding: "9px 18px", cursor: "pointer", transition: "background 0.2s var(--ease-out)" }}
+                      onMouseEnter={e => { e.currentTarget.style.background = T_CARET; }}
+                      onMouseLeave={e => { e.currentTarget.style.background = T_PROMPT; }}
+                    >
+                      ⏎ /join
+                    </button>
+                    <span style={{ fontSize: 11, color: T_LABEL }}>↵ submit · we reply within 2 days</span>
+                  </div>
                 </form>
-              </>
-            )}
+              )}
+            </div>
           </div>
 
-          {/* Cursive tagline — reuses the site's display italic rather than a new font */}
-          <p style={{
-            fontFamily: "var(--font-display)", fontStyle: "italic",
-            fontSize: "var(--text-lg)", color: LOUD_BLUE,
-            textAlign: "center", marginTop: 24,
-          }}>
-            Can't wait to hear from you!
+          {/* mono tagline, matching the terminal voice */}
+          <p style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "rgba(238,233,220,0.35)", textAlign: "center", marginTop: 16 }}>
+            // SDS · Society for Data Science
           </p>
         </div>
       </div>
@@ -238,7 +201,10 @@ export default function Connect() {
         @media (max-width: 768px) {
           #connect > div > div { grid-template-columns: 1fr !important; }
         }
-        input::placeholder, textarea::placeholder { color: rgba(12,14,20,0.3); }
+        .t-input::placeholder { color: rgba(38,36,30,0.32); }
+        .t-field { display: flex; align-items: center; gap: 10px; border: 1px solid rgba(20,18,14,0.14); border-radius: 8px; padding: 9px 12px; margin-bottom: 10px; background: rgba(255,255,255,0.4); cursor: text; transition: border-color 0.18s var(--ease-out), box-shadow 0.18s var(--ease-out); }
+        .t-field:focus-within { border-color: #D9785A; box-shadow: 0 0 0 3px rgba(217,120,90,0.12); }
+        .t-field--msg { align-items: flex-start; }
       `}</style>
     </section>
   );

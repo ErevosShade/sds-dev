@@ -1,8 +1,8 @@
-import { useTextReveal } from "../../hooks/useTextReveal";
+import { useWriteReveal } from "../../hooks/useWriteReveal";
 import { SPONSORS } from "../../data/sponsors";
 
 export default function Sponsors() {
-  const headRef = useTextReveal();
+  const headRef = useWriteReveal();
 
   return (
     <section

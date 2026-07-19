@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SPEAKERS } from "../../data/speakers";
-import { useTextReveal } from "../../hooks/useTextReveal";
+import { useWriteReveal } from "../../hooks/useWriteReveal";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -12,7 +12,7 @@ export default function Speakers() {
   const pageRefs   = useRef([]);
   const [active, setActive] = useState(0);
   const reducedMotionRef = useRef(false);
-  const headRef = useTextReveal();
+  const headRef = useWriteReveal();
 
   // Reveals speaker `idx` by setting each page's turned/unturned state directly —
   // used both for the reduced-motion click path and as the instant "get in sync"

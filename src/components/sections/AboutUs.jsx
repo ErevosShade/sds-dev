@@ -1,5 +1,5 @@
 import { useReveal } from "../../hooks/useReveal";
-import { useTextReveal } from "../../hooks/useTextReveal";
+import { useWriteReveal } from "../../hooks/useWriteReveal";
 
 const PILLARS = [
   { n: "01", title: "Build",    tag: "Real projects, production APIs — if it doesn't run, it doesn't count." },
@@ -9,7 +9,7 @@ const PILLARS = [
 ];
 
 export default function AboutUs() {
-  const headRef = useTextReveal({ delay: 0 });
+  const headRef = useWriteReveal({ delay: 0 });
   const paraRef = useReveal({ delay: 0.1 });
   const flowRef = useReveal({ delay: 0.2 });
 

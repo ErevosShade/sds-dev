@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useTextReveal } from "../../hooks/useTextReveal";
+import { useWriteReveal } from "../../hooks/useWriteReveal";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -24,7 +24,7 @@ export default function Gallery() {
   const trackRef    = useRef(null);
   const labelRef    = useRef(null);
   const [reduceMotion, setReduceMotion] = useState(false);
-  const headRef = useTextReveal();
+  const headRef = useWriteReveal();
 
   useEffect(() => {
     setReduceMotion(window.matchMedia("(prefers-reduced-motion: reduce)").matches);

@@ -1,10 +1,10 @@
 import { useRef } from "react";
 import { useReveal } from "../../hooks/useReveal";
-import { useTextReveal } from "../../hooks/useTextReveal";
+import { useWriteReveal } from "../../hooks/useWriteReveal";
 import { PROJECTS } from "../../data/projects";
 
 export default function Projects() {
-  const headRef = useTextReveal();
+  const headRef = useWriteReveal();
   const gridRef = useReveal({ delay: 0.15 });
 
   return (
