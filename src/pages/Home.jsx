@@ -8,9 +8,9 @@ import Sponsors      from "../components/sections/Sponsors";
 import Gallery       from "../components/sections/Gallery";
 import Connect       from "../components/sections/Connect";
 
-const Home = () => (
+const Home = ({ introDone = true }) => (
   <main>
-    <Hero />
+    <Hero introDone={introDone} />
     <AboutUs />
     <Events />
     <Speakers />

@@ -4,7 +4,14 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 gsap.registerPlugin(ScrollTrigger);
 
-export default function Hero() {
+// Module-scoped, NOT a ref: React StrictMode (dev) fully unmounts and remounts
+// the component, which creates a fresh useRef each time — so a ref guard resets
+// and the entrance replays. A module-level latch survives the remount and only
+// resets on a real page reload (module re-evaluation), which is exactly the
+// "play the hero entrance once per page load" semantics we want.
+let heroEntrancePlayed = false;
+
+export default function Hero({ introDone = true }) {
   const wrapRef   = useRef(null);
   const canvasRef = useRef(null);
   const textRef   = useRef(null);
@@ -129,22 +136,36 @@ export default function Hero() {
   // Scoping to textRef meant gsap's selector lookup could never find
   // ".hero-stats" (logged as "GSAP target .hero-stats not found"), so the
   // stats fade-in silently never ran.
+  //
+  // Gated on introDone: while the loader is up, the hero sits hidden and only
+  // staggers in the moment the loader lifts — so the reveal is actually seen,
+  // not played out behind an opaque overlay. When there's no intro (already
+  // seen this session), introDone starts true and it plays on mount.
+  //
+  // heroEntrancePlayed (module scope, above) makes this a strict one-shot that
+  // survives StrictMode's dev remount. We deliberately don't ctx.revert on
+  // cleanup (which would snap the hero back to hidden and leave it stuck when
+  // the guard blocks a second run) — clearProps hands the elements back to
+  // their natural CSS once the tween finishes.
   useEffect(() => {
-    const ctx = gsap.context(() => {
-      gsap.from(".hero-line", { opacity: 0, y: 40, duration: 1.1, ease: "power3.out", stagger: 0.12, delay: 0.3 });
-      gsap.from(".hero-sub",  { opacity: 0, y: 20, duration: 0.9, ease: "power3.out", delay: 0.8 });
-      gsap.from(".hero-cta",  { opacity: 0, y: 16, duration: 0.8, ease: "power3.out", delay: 1.1 });
-      gsap.from(".hero-stats", { opacity: 0, duration: 0.8, delay: 1.3 });
-    }, wrapRef);
-    return () => ctx.revert();
-  }, []);
+    if (!introDone || heroEntrancePlayed || !wrapRef.current) return;
+    heroEntrancePlayed = true;
+    const q = gsap.utils.selector(wrapRef.current);
+    gsap.from(q(".hero-line"),  { opacity: 0, y: 40, duration: 1.1, ease: "power3.out", stagger: 0.12, delay: 0.1, clearProps: "opacity,transform" });
+    gsap.from(q(".hero-sub"),   { opacity: 0, y: 20, duration: 0.9, ease: "power3.out", delay: 0.6, clearProps: "opacity,transform" });
+    gsap.from(q(".hero-cta"),   { opacity: 0, y: 16, duration: 0.8, ease: "power3.out", delay: 0.9, clearProps: "opacity,transform" });
+    gsap.from(q(".hero-stats"), { opacity: 0, duration: 0.8, delay: 1.1, clearProps: "opacity" });
+  }, [introDone]);
 
-  // Scroll drain + scroll indicator fade
+  // Scroll drain + scroll indicator fade + parallax depth
   useEffect(() => {
     const wrap     = wrapRef.current;
     const maskWrap = maskWrapRef.current;
     const scroll   = scrollRef.current;
+    const text     = textRef.current;
     if (!wrap) return;
+
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     const ctx = gsap.context(() => {
       if (scroll) {
@@ -158,6 +179,23 @@ export default function Hero() {
           clipPath: "inset(100% 0% 0% 0%)",
           ease: "none",
           scrollTrigger: { trigger: wrap, start: "center top", end: "bottom top", scrub: 1.5 },
+        });
+      }
+      // Parallax: the text column drifts up faster than the gaussian field
+      // behind it, giving real depth as the hero exits — foreground text
+      // leaves ahead of the background layer. Skipped under reduced motion.
+      if (text && !reduce) {
+        gsap.to(text, {
+          yPercent: -16,
+          ease: "none",
+          scrollTrigger: { trigger: wrap, start: "top top", end: "bottom top", scrub: true },
+        });
+      }
+      if (maskWrap && !reduce) {
+        gsap.to(maskWrap, {
+          yPercent: -5, // background drifts up less than the text = slower plane, real depth
+          ease: "none",
+          scrollTrigger: { trigger: wrap, start: "top top", end: "bottom top", scrub: true },
         });
       }
     }, wrap);
